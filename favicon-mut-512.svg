@@ -1,0 +1,23 @@
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" width="512" height="512">
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="96" fill="#2E75B6"/>
+
+  <!-- Image frame -->
+  <rect x="88" y="128" width="280" height="210" rx="18" fill="none" stroke="white" stroke-width="22"/>
+
+  <!-- Mountains -->
+  <polygon points="108,318 195,215 282,318" fill="white"/>
+  <polygon points="218,318 300,232 368,318" fill="white" opacity="0.7"/>
+
+  <!-- Sun circle -->
+  <circle cx="320" cy="178" r="28" fill="white"/>
+
+  <!-- Magnifying glass -->
+  <circle cx="370" cy="340" r="72" fill="#1a5a94" stroke="white" stroke-width="20"/>
+  <circle cx="370" cy="340" r="42" fill="none" stroke="white" stroke-width="20"/>
+  <line x1="402" y1="374" x2="436" y2="412" stroke="white" stroke-width="24" stroke-linecap="round"/>
+
+  <!-- Green check dot -->
+  <circle cx="420" cy="152" r="38" fill="#00a32a"/>
+  <polyline points="401,152 415,167 442,138" fill="none" stroke="white" stroke-width="14" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

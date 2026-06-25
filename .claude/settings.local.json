@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -v)",
+      "PowerShell($paths = @\\(\"C:\\\\xampp\\\\php\\\\php.exe\",\"C:\\\\wamp64\\\\bin\\\\php\",\"C:\\\\laragon\\\\bin\\\\php\",\"$env:LOCALAPPDATA\\\\Programs\\\\Local\",\"C:\\\\tools\\\\php\"\\); foreach\\($p in $paths\\){ if\\(Test-Path $p\\){ Write-Output \"FOUND: $p\" } }; Get-Command php -ErrorAction SilentlyContinue | Select-Object Source; Get-ChildItem -Path \"C:\\\\\" -Filter \"php.exe\" -Recurse -Depth 3 -ErrorAction SilentlyContinue | Select-Object -First 5 FullName)",
+      "PowerShell(& \"C:\\\\wamp64\\\\bin\\\\php\\\\php8.3.28\\\\php.exe\" -v)",
+      "PowerShell($php=\"C:\\\\wamp64\\\\bin\\\\php\\\\php8.3.28\\\\php.exe\"; @\\(\"includes\\\\class-cleanup-advisor.php\",\"includes\\\\class-cleanup-suggestions.php\",\"includes\\\\class-usage-storage.php\"\\) | ForEach-Object { & $php -l \"C:\\\\media-usage-tracker\\\\$_\" })",
+      "Bash(grep -v \"//\\\\|*\")",
+      "Bash(sed -n '138,175p' includes/class-usage-storage.php)",
+      "Bash(sed -n '200,235p' includes/class-usage-storage.php)",
+      "Bash(C:\\\\wamp64\\\\bin\\\\php\\\\php8.3.28\\\\php.exe C:\\\\media-usage-tracker\\\\tests\\\\test-jet-detectors.php)",
+      "PowerShell(cd \"C:\\\\wamp64\\\\www\\\\dml\"; php -r \"require\\('wp-load.php'\\); global \\\\$wpdb; \\\\$tables = \\\\$wpdb->get_col\\(\\\\\"SHOW TABLES LIKE '%wpdatatable%'\\\\\"\\); echo implode\\(\\\\\"\\\\n\\\\\", \\\\$tables\\);\")",
+      "Bash(node --input-type=module)",
+      "Bash(grep -n 'handle_generate_alt_text\\\\|mut_generate_alt_text\\\\|$type' C:/media-usage-tracker/includes/class-alt-text-generator.php)",
+      "Bash(php -r ' *)",
+      "PowerShell(cd C:\\\\wamp64\\\\www\\\\dml; php -r \"define\\('ABSPATH', 'C:/wamp64/www/dml/'\\); require_once 'wp-load.php'; global \\\\$wpdb; \\\\$rows = \\\\$wpdb->get_results\\(\\\\\"SELECT attachment_id, post_id, post_type, usage_type, context FROM {\\\\$wpdb->prefix}mut_media_usage WHERE usage_type = 'woocommerce' LIMIT 20\\\\\"\\); echo 'WooCommerce rows: ' . count\\(\\\\$rows\\) . PHP_EOL; foreach\\(\\\\$rows as \\\\$r\\) { echo \\\\$r->attachment_id . ' | ' . \\\\$r->post_id . ' | ' . \\\\$r->usage_type . ' | ' . \\\\$r->context . PHP_EOL; }\")",
+      "Bash(npm list *)",
+      "Bash(npm install *)",
+      "Bash(node build-doc.js)",
+      "Bash(npm init *)",
+      "Bash(node -e \"require\\('docx'\\)\")",
+      "Bash(node build-live-report.js)",
+      "mcp__visualize__read_me",
+      "mcp__visualize__show_widget",
+      "Bash(python -c \"import cairosvg; cairosvg.svg2png\\(url='favicon-mut-512.svg', write_to='favicon-mut-512.png', output_width=512, output_height=512\\); print\\('done'\\)\")",
+      "Bash(node -e ' *)",
+      "Bash(pip install *)"
+    ]
+  }
+}
