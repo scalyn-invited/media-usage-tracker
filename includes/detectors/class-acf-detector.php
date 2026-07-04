@@ -57,6 +57,56 @@ class AcfDetector implements MediaDetector {
 	}
 
 	/**
+	 * Scan ACF fields on taxonomy terms (categories, tags, custom taxonomies).
+	 * Called once per scan by MediaScanner::scan_global_detectors().
+	 */
+	public function scan_all( $scan_id ) {
+		if ( ! $this->is_available() ) {
+			return;
+		}
+
+		$taxonomies = get_taxonomies( array( 'public' => true ), 'names' );
+
+		foreach ( $taxonomies as $taxonomy ) {
+			$terms = get_terms( array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'ids',
+			) );
+
+			if ( is_wp_error( $terms ) || empty( $terms ) ) {
+				continue;
+			}
+
+			foreach ( $terms as $term_id ) {
+				$term_key = $taxonomy . '_' . $term_id;
+				$fields   = get_field_objects( $term_key, false );
+
+				if ( empty( $fields ) || ! is_array( $fields ) ) {
+					continue;
+				}
+
+				$found = array();
+				$this->walk_fields( $fields, $found );
+
+				$term = get_term( $term_id, $taxonomy );
+				$term_name = $term ? $term->name : 'Term ' . $term_id;
+
+				foreach ( $found as $id => $label ) {
+					$this->storage->record_usage( array(
+						'attachment_id' => $id,
+						'post_id'       => 0,
+						'post_type'     => 'taxonomy',
+						'usage_type'    => 'acf',
+						'context'       => 'ACF (' . $taxonomy . ': ' . $term_name . '): ' . substr( (string) $label, 0, 150 ),
+						'scan_id'       => $scan_id,
+					) );
+				}
+			}
+		}
+	}
+
+	/**
 	 * Recursively walk ACF fields, collecting attachment IDs into $found.
 	 * Handles repeaters, flexible content layouts, and groups.
 	 *

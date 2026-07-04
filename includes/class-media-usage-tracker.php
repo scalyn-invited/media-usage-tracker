@@ -300,9 +300,14 @@ class Plugin {
         if ( strpos( $hook, 'media-usage-tracker' ) === false && strpos( $hook, 'mut-' ) === false ) {
             return;
         }
-
-        wp_enqueue_style( 'mut-admin', MUT_PLUGIN_URL . 'assets/css/mut-admin.css', array(), MUT_VERSION );
-        wp_enqueue_script( 'mut-admin', MUT_PLUGIN_URL . 'assets/js/mut-admin.js', array( 'jquery' ), MUT_VERSION, true );
+         wp_enqueue_style(
+        'mut-tailwind',
+        MUT_PLUGIN_URL . 'assets/css/tailwind.css',
+        array(),
+        file_exists( MUT_PLUGIN_DIR . 'assets/css/tailwind.css' ) ? filemtime( MUT_PLUGIN_DIR . 'assets/css/tailwind.css' ) : MUT_VERSION
+    );
+        wp_enqueue_style( 'mut-admin', MUT_PLUGIN_URL . 'assets/css/mut-admin.css', array(), file_exists( MUT_PLUGIN_DIR . 'assets/css/mut-admin.css' ) ? filemtime( MUT_PLUGIN_DIR . 'assets/css/mut-admin.css' ) : MUT_VERSION );
+        wp_enqueue_script( 'mut-admin', MUT_PLUGIN_URL . 'assets/js/mut-admin.js', array( 'jquery' ), file_exists( MUT_PLUGIN_DIR . 'assets/js/mut-admin.js' ) ? filemtime( MUT_PLUGIN_DIR . 'assets/js/mut-admin.js' ) : MUT_VERSION, true );
 
         wp_localize_script( 'mut-admin', 'mutAjax', array(
             'ajax_url'   => admin_url( 'admin-ajax.php' ),

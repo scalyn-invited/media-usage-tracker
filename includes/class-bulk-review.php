@@ -191,69 +191,70 @@ class BulkReview {
 
             <?php if ( ! empty( $items ) ) : ?>
 
-                <div style="overflow-x:auto;">
-                <table class="wp-list-table widefat striped mut-bulk-table" id="mut-bulk-table">
-                    <thead>
-                        <tr>
-                            <th class="mut-cb-col"><input type="checkbox" id="mut-select-all-top"></th>
-                            <th style="width:60px;">Preview</th>
-                            <th>File / Title</th>
-                            <th style="width:90px;">Type</th>
-                            <th style="width:110px;">Status</th>
-                            <th style="width:120px;">Review Status</th>
-                            <th style="width:120px;">Upload Date</th>
-                            <th style="width:80px;">Actions</th>
+                <div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+                <table class="mut-bulk-table w-full block md:table text-sm text-left text-gray-700" id="mut-bulk-table">
+                    <thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <tr class="md:table-row">
+                            <th class="md:table-cell md:w-[4%] px-4 py-3"><input type="checkbox" id="mut-select-all-top" class="h-4 w-4 accent-indigo-600"></th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Preview</th>
+                            <th class="md:table-cell md:w-[28%] px-4 py-3">File / Title</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Type</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">Status</th>
+                            <th class="md:table-cell md:w-[12%] px-4 py-3">Review Status</th>
+                            <th class="md:table-cell md:w-[14%] px-4 py-3">Upload Date</th>
+                            <th class="md:table-cell md:w-[16%] px-4 py-3">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                         <?php foreach ( $items as $item ) : ?>
-                            <tr data-id="<?php echo esc_attr( $item['id'] ); ?>" class="mut-bulk-row <?php echo $item['review_status'] ? 'mut-row-' . esc_attr( $item['review_status'] ) : ''; ?>">
-                                <td class="mut-cb-col">
-                                    <input type="checkbox" class="mut-row-cb" value="<?php echo esc_attr( $item['id'] ); ?>">
+                            <tr data-id="<?php echo esc_attr( $item['id'] ); ?>" class="mut-bulk-row <?php echo $item['review_status'] ? 'mut-row-' . esc_attr( $item['review_status'] ) : ''; ?> flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+                                <td class="order-1 md:table-cell md:w-[4%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <input type="checkbox" class="mut-row-cb h-4 w-4 accent-indigo-600" value="<?php echo esc_attr( $item['id'] ); ?>">
                                 </td>
-                                <td class="mut-td-thumb">
+                                <td class="order-2 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <?php
                                     $thumb = wp_get_attachment_image( $item['id'], array( 50, 50 ), true, array(
-                                        'style' => 'width:50px;height:50px;object-fit:cover;border-radius:4px;display:block;',
+                                        'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
                                     ) );
-                                    echo $thumb ?: '<span class="mut-no-thumb"></span>';
+                                    echo $thumb ?: '<span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-lg">📄</span>';
                                     ?>
                                 </td>
-                                <td class="mut-td-filename">
+                                <td class="order-3 flex-1 min-w-0 md:table-cell md:w-[28%] md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <strong>
-                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $item['id'] ) ); ?>" class="mut-filename-link">
+                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $item['id'] ) ); ?>" class="text-gray-900 hover:text-indigo-600 no-underline">
                                             <?php echo esc_html( $item['filename'] ); ?>
                                         </a>
                                     </strong>
                                     <?php if ( $item['title'] && $item['title'] !== $item['filename'] ) : ?>
-                                        <br><span class="mut-meta"><?php echo esc_html( $item['title'] ); ?></span>
+                                        <br><span class="text-xs text-gray-500"><?php echo esc_html( $item['title'] ); ?></span>
                                     <?php endif; ?>
+                                    <br><span class="text-xs text-gray-400 md:hidden"><?php echo esc_html( $item['upload_date'] ); ?></span>
                                 </td>
-                                <td class="mut-td-type"><span class="mut-cs-mime"><?php echo esc_html( $item['mime_label'] ); ?></span></td>
-                                <td class="mut-td-status">
+                                <td class="order-4 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-5 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600"><?php echo esc_html( $item['mime_label'] ); ?></span>
+                                </td>
+                                <td class="order-6 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
                                     <?php if ( $item['usage_count'] > 0 ) : ?>
-                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $item['id'] ) ); ?>" style="text-decoration:none;" title="View usage locations">
-                                            <span class="mut-status-badge mut-status-used">In Use</span>
+                                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $item['id'] ) ); ?>" class="no-underline" title="View usage locations">
+                                            <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
                                         </a>
                                     <?php else : ?>
-                                        <span class="mut-status-badge mut-status-unused">Unused</span>
+                                        <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="mut-td-count mut-review-status-cell">
+                                <td class="order-7 mut-review-status-cell md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
                                     <?php echo $this->render_review_badge( $item['review_status'] ); ?>
                                 </td>
-                                <td class="mut-td-date"><span class="mut-meta"><?php echo esc_html( $item['upload_date'] ); ?></span></td>
-                                <td class="mut-td-actions mut-actions-cell">
-                                    <a href="<?php echo esc_url( admin_url( 'upload.php?item=' . $item['id'] ) ); ?>" class="button button-small mut-act-desk" title="View in Media Library">View</a>
+                                <td class="order-8 max-md:hidden md:table-cell md:w-[14%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500">
+                                    <?php echo esc_html( $item['upload_date'] ); ?>
+                                </td>
+                                <td class="order-9 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-10 md:table-cell md:w-[16%] px-0 md:px-4 py-1 md:py-3 md:align-middle flex gap-1.5 md:whitespace-nowrap">
+                                    <a href="<?php echo esc_url( admin_url( 'upload.php?item=' . $item['id'] ) ); ?>" class="button button-small" title="View in Media Library">View</a>
                                     <?php if ( $item['usage_count'] === 0 ) : ?>
-                                        <button type="button" class="button button-small mut-delete-btn mut-act-desk" data-id="<?php echo esc_attr( $item['id'] ); ?>" data-name="<?php echo esc_attr( $item['filename'] ); ?>" title="Safely delete this file">🗑️</button>
+                                        <button type="button" class="button button-small mut-delete-btn" data-id="<?php echo esc_attr( $item['id'] ); ?>" data-name="<?php echo esc_attr( $item['filename'] ); ?>" title="Safely delete this file">🗑️</button>
                                     <?php endif; ?>
-                                    <div class="mut-mob-actions">
-                                        <a href="<?php echo esc_url( admin_url( 'upload.php?item=' . $item['id'] ) ); ?>" class="mut-mob-btn">View</a>
-                                        <?php if ( $item['usage_count'] === 0 ) : ?>
-                                        <button type="button" class="mut-mob-btn mut-mob-btn-del mut-delete-btn" data-id="<?php echo esc_attr( $item['id'] ); ?>" data-name="<?php echo esc_attr( $item['filename'] ); ?>">Delete</button>
-                                        <?php endif; ?>
-                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>

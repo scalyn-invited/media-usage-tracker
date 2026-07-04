@@ -34,8 +34,89 @@ capability.
 - **REST API** — expose scan/results endpoints (currently uses legacy
   `admin-ajax.php`)
 - **WP_List_Table** — refactor the custom result tables onto the native
-  list-table class (currently hand-built `<table class="wp-list-table">` markup
-  with manual pagination)
+  list-table class (currently hand-built Tailwind-styled `<table>` markup with
+  manual pagination — see **Admin UI Styling** below)
+
+---
+
+## Admin UI Styling
+
+All eight admin data tables (Trash Bin, Reports' scan history, Cleanup
+Suggestions, Bulk Review, Search & Filter, Media Usage's three tables,
+Duplicate Analysis, Quality Detail) have been migrated off WordPress core's
+`wp-list-table widefat striped` markup onto hand-written Tailwind CSS v4
+utility classes. `admin/`, dashboard cards, settings, and modals are still on
+the legacy `assets/css/mut-admin.css` stylesheet — only the *tables* have been
+converted so far.
+
+### Build
+
+- Source: `assets/css/input.css` (just `@import "tailwindcss";`)
+- Output: `assets/css/tailwind.css`, committed to the repo (not generated at
+  request time)
+- Rebuild after any class change: `npx @tailwindcss/cli -i ./assets/css/input.css -o ./assets/css/tailwind.css`
+  (run from the plugin root)
+- Both `mut-tailwind` and `mut-admin` styles are enqueued together on every
+  plugin admin page (`class-media-usage-tracker.php::enqueue_assets()`),
+  versioned via `filemtime()` so edits bust the browser cache automatically —
+  this replaced an earlier static `MUT_VERSION` query string that caused stale
+  CSS during development
+
+### Responsive table pattern
+
+Every converted table follows the same shape:
+
+- Desktop (`md:` and up): a real `<table>`/`thead`/`tbody`/`tr`/`td` structure
+  (`block md:table`, `md:table-row`, `md:table-cell`), columns sized with
+  **percentage widths summing to 100%** (e.g. `md:w-[28%]`) rather than pixel
+  widths — pixel widths are only *hints* under `table-layout: auto`, and any
+  gap between their sum and the table's actual rendered width gets distributed
+  proportionally across every column, not just the flexible one. This
+  surfaces worst on whichever column has the least content (a short badge or
+  em-dash), producing a visually glaring empty gap even though every column is
+  technically stretched by the same factor.
+- Mobile (below `md`): the same `<tr>` becomes `flex flex-wrap`, and each `<td>`
+  is a flex item positioned with `order-N`. Deliberate empty spacer `<td>`s
+  (`basis-full w-0 h-0 p-0 md:hidden`) force line breaks between logical
+  groups (e.g. checkbox+thumbnail+filename on line 1, short metadata badges on
+  line 2, actions on line 3) — relying on incidental flex-wrap without a
+  spacer is fragile and shuffles unpredictably at odd viewport widths.
+- Real thumbnails via `wp_get_attachment_image()` where the attachment still
+  exists. **Trash Bin is the exception**: `Safe_Delete::trash()` calls
+  `wp_delete_attachment( $id, true )`, which deletes the attachment post and
+  all generated thumbnail sizes before the file is moved to a private,
+  `.htaccess`-locked trash directory. There is no attachment ID or public URL
+  left to hand to `wp_get_attachment_image()`, so Trash Bin instead reads the
+  raw file and inlines it as a `data:` URI (capped at 2MB; non-images and
+  oversized files fall back to an icon).
+
+### Gotcha: WordPress core's `.hidden` class
+
+WP admin ships its own unlayered `.hidden { display: none; }` utility
+(bundled with legacy `.hide-if-js` selectors in `wp-admin/css/common.css`).
+Tailwind wraps all its utilities in `@layer utilities`, and per the CSS
+cascade-layers spec, **any unlayered rule always beats any layered rule for
+the same property, regardless of specificity or source order.** Using
+Tailwind's bare `hidden` class on an element that needs a *responsive*
+override (e.g. `hidden md:table-header-group` to show a `<thead>` only at
+desktop) silently loses to WP core's `.hidden` and never displays — the
+element just stays hidden at every width. **Fix: use `max-md:hidden` instead
+of bare `hidden`** whenever the element needs to reappear at a larger
+breakpoint; it's a uniquely-named class WP doesn't define, so there's no
+collision. Bare `hidden` is still fine for elements that are simply
+JS-toggled on/off entirely with no responsive override fighting it (e.g.
+`#mut-trash-notice`).
+
+### JS-owned markup — do not restyle freely
+
+A few cells are read and rewritten directly by `assets/js/mut-admin.js` via
+`.closest()`/`.find()` on specific class names after an AJAX call succeeds
+(bulk review's review-status badge, duplicate analysis's flag/archive/clear
+action cell, quality detail's alt-text/caption inline AI-review cells). Their
+internals were deliberately left untouched during the Tailwind pass — only
+the outer `<td>` got width/order utility classes — because changing those
+class names would make the page look different immediately after an action
+versus after a page reload.
 
 ---
 

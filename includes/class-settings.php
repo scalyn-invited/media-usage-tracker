@@ -20,7 +20,7 @@ class Settings {
 		}
 		?>
 		<div class="wrap">
-			<h1><?php esc_html_e( 'Media Usage Tracker Settings', 'media-usage-tracker' ); ?></h1>
+			<h1>⚙️ <?php esc_html_e( 'Media Usage Tracker Settings', 'media-usage-tracker' ); ?></h1>
 
 			<?php if ( isset( $_GET['settings-updated'] ) ) : ?>
 				<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Settings saved.', 'media-usage-tracker' ); ?></p></div>
@@ -160,16 +160,23 @@ class Settings {
 					<tr id="mut-row-gemini" <?php echo $active_provider !== 'gemini' ? 'style="display:none;"' : ''; ?>>
 						<th scope="row"><label for="mut_gemini_api_key"><?php esc_html_e( 'Google Gemini API Key', 'media-usage-tracker' ); ?></label></th>
 						<td>
-							<input
-								type="password"
-								id="mut_gemini_api_key"
-								class="regular-text"
-								name="<?php echo esc_attr( AltTextGenerator::OPT_GEMINI_KEY ); ?>"
-								value="<?php echo esc_attr( $gemini_key ); ?>"
-								placeholder="AIza..."
-								autocomplete="off"
-							/>
-							<button type="button" class="button mut-toggle-key" data-target="mut_gemini_api_key" style="margin-left:6px;">Show</button>
+							<span style="position:relative;display:inline-block;max-width:100%;">
+								<input
+									type="password"
+									id="mut_gemini_api_key"
+									class="regular-text"
+									style="padding-right:34px;max-width:100%;box-sizing:border-box;"
+									name="<?php echo esc_attr( AltTextGenerator::OPT_GEMINI_KEY ); ?>"
+									value="<?php echo esc_attr( $gemini_key ); ?>"
+									placeholder="AIza..."
+									autocomplete="off"
+								/>
+								<button type="button" class="button-link mut-toggle-key" data-target="mut_gemini_api_key"
+									style="position:absolute;right:8px;top:50%;transform:translateY(-50%);line-height:1;">
+									<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+									<span class="screen-reader-text">Show API key</span>
+								</button>
+							</span>
 							<p class="description">
 								<a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">Get a free Gemini API key →</a>
 							</p>
@@ -180,16 +187,23 @@ class Settings {
 					<tr id="mut-row-anthropic" <?php echo $active_provider !== 'anthropic' ? 'style="display:none;"' : ''; ?>>
 						<th scope="row"><label for="mut_anthropic_api_key"><?php esc_html_e( 'Anthropic API Key', 'media-usage-tracker' ); ?></label></th>
 						<td>
-							<input
-								type="password"
-								id="mut_anthropic_api_key"
-								class="regular-text"
-								name="<?php echo esc_attr( AltTextGenerator::OPT_ANTHROPIC_KEY ); ?>"
-								value="<?php echo esc_attr( $anthropic_key ); ?>"
-								placeholder="sk-ant-..."
-								autocomplete="off"
-							/>
-							<button type="button" class="button mut-toggle-key" data-target="mut_anthropic_api_key" style="margin-left:6px;">Show</button>
+							<span style="position:relative;display:inline-block;max-width:100%;">
+								<input
+									type="password"
+									id="mut_anthropic_api_key"
+									class="regular-text"
+									style="padding-right:34px;max-width:100%;box-sizing:border-box;"
+									name="<?php echo esc_attr( AltTextGenerator::OPT_ANTHROPIC_KEY ); ?>"
+									value="<?php echo esc_attr( $anthropic_key ); ?>"
+									placeholder="sk-ant-..."
+									autocomplete="off"
+								/>
+								<button type="button" class="button-link mut-toggle-key" data-target="mut_anthropic_api_key"
+									style="position:absolute;right:8px;top:50%;transform:translateY(-50%);line-height:1;">
+									<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+									<span class="screen-reader-text">Show API key</span>
+								</button>
+							</span>
 							<p class="description">
 								<a href="https://console.anthropic.com/" target="_blank" rel="noopener">Get an Anthropic API key →</a>
 							</p>
@@ -200,16 +214,23 @@ class Settings {
 					<tr id="mut-row-groq" <?php echo $active_provider !== 'groq' ? 'style="display:none;"' : ''; ?>>
 						<th scope="row"><label for="mut_groq_api_key"><?php esc_html_e( 'Groq API Key', 'media-usage-tracker' ); ?></label></th>
 						<td>
-							<input
-								type="password"
-								id="mut_groq_api_key"
-								class="regular-text"
-								name="<?php echo esc_attr( AltTextGenerator::OPT_GROQ_KEY ); ?>"
-								value="<?php echo esc_attr( $groq_key ); ?>"
-								placeholder="gsk_..."
-								autocomplete="off"
-							/>
-							<button type="button" class="button mut-toggle-key" data-target="mut_groq_api_key" style="margin-left:6px;">Show</button>
+							<span style="position:relative;display:inline-block;max-width:100%;">
+								<input
+									type="password"
+									id="mut_groq_api_key"
+									class="regular-text"
+									style="padding-right:34px;max-width:100%;box-sizing:border-box;"
+									name="<?php echo esc_attr( AltTextGenerator::OPT_GROQ_KEY ); ?>"
+									value="<?php echo esc_attr( $groq_key ); ?>"
+									placeholder="gsk_..."
+									autocomplete="off"
+								/>
+								<button type="button" class="button-link mut-toggle-key" data-target="mut_groq_api_key"
+									style="position:absolute;right:8px;top:50%;transform:translateY(-50%);line-height:1;">
+									<span class="dashicons dashicons-visibility" aria-hidden="true"></span>
+									<span class="screen-reader-text">Show API key</span>
+								</button>
+							</span>
 							<p class="description">
 								<a href="https://console.groq.com/keys" target="_blank" rel="noopener">Get a free Groq API key →</a>
 							</p>
@@ -225,10 +246,12 @@ class Settings {
 		jQuery(document).ready(function($){
 			// Show/hide key toggle
 			$(document).on('click', '.mut-toggle-key', function(){
-				var $f   = $('#' + $(this).data('target'));
-				var show = $f.attr('type') === 'password';
+				var $btn  = $(this);
+				var $f    = $('#' + $btn.data('target'));
+				var show  = $f.attr('type') === 'password';
 				$f.attr('type', show ? 'text' : 'password');
-				$(this).text(show ? 'Hide' : 'Show');
+				$btn.find('.dashicons').toggleClass('dashicons-visibility', !show).toggleClass('dashicons-hidden', show);
+				$btn.find('.screen-reader-text').text(show ? 'Hide API key' : 'Show API key');
 			});
 
 			// Per-provider key state passed from PHP

@@ -206,91 +206,87 @@ class MediaSearch {
 
             <?php if ( ! empty( $items ) ) : ?>
 
-                <div style="overflow-x:auto;">
-                <table class="wp-list-table widefat striped mut-search-table">
-                    <thead>
-                        <tr>
+                <div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+                <table class="mut-search-table w-full block md:table text-sm text-left text-gray-700">
+                    <thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <tr class="md:table-row">
                             <?php if ( $is_unused_filter ) : ?>
-                            <th class="mut-col-cb" style="width:36px;">
-                                <input type="checkbox" id="mut-search-cb-all" title="Select all">
+                            <th class="md:table-cell md:w-[4%] px-4 py-3">
+                                <input type="checkbox" id="mut-search-cb-all" class="h-4 w-4 accent-indigo-600" title="Select all">
                             </th>
                             <?php endif; ?>
-                            <th class="mut-col-thumb">Thumbnail</th>
-                            <th>Filename</th>
-                            <th class="mut-col-type">Media Type</th>
-                            <th class="mut-col-date">Upload Date</th>
-                            <th class="mut-col-size">File Size</th>
-                            <th class="mut-col-count">Usage Count</th>
-                            <th class="mut-col-status">Status</th>
-                            <th class="mut-col-actions">Actions</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Thumbnail</th>
+                            <th class="md:table-cell md:w-[30%] px-4 py-3">Filename</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">Media Type</th>
+                            <th class="md:table-cell md:w-[12%] px-4 py-3">Upload Date</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">File Size</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Usage Count</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">Status</th>
+                            <th class="md:table-cell md:w-[12%] px-4 py-3">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                         <?php foreach ( $items as $item ) : ?>
                             <?php
                             $detail_url = admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $item['id'] );
                             $count      = $item['usage_count'];
                             $filename   = esc_attr( $item['filename'] );
                             ?>
-                            <tr data-id="<?php echo esc_attr( $item['id'] ); ?>">
+                            <tr data-id="<?php echo esc_attr( $item['id'] ); ?>"
+                                class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
                                 <?php if ( $is_unused_filter ) : ?>
-                                <td class="mut-col-cb">
-                                    <input type="checkbox" class="mut-search-cb-row" value="<?php echo esc_attr( $item['id'] ); ?>">
+                                <td class="order-1 md:table-cell md:w-[4%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <input type="checkbox" class="mut-search-cb-row h-4 w-4 accent-indigo-600" value="<?php echo esc_attr( $item['id'] ); ?>">
                                 </td>
                                 <?php endif; ?>
-                                <td class="mut-td-thumb">
+                                <td class="order-2 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <?php
                                     $thumb = wp_get_attachment_image( $item['id'], array( 56, 56 ), true, array(
-                                        'style' => 'width:56px;height:56px;object-fit:cover;border-radius:4px;display:block;',
+                                        'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
                                     ) );
-                                    echo $thumb ?: '<span class="mut-file-icon">' . esc_html( $item['mime_label'] ) . '</span>';
+                                    echo $thumb ?: '<span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-[10px] font-semibold text-gray-500">' . esc_html( $item['mime_label'] ) . '</span>';
                                     ?>
                                 </td>
-                                <td class="mut-td-filename">
-                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="mut-filename-link">
+                                <td class="order-3 flex-1 min-w-0 md:table-cell md:w-[30%] md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="text-gray-900 hover:text-indigo-600 no-underline">
                                         <strong><?php echo esc_html( $item['filename'] ); ?></strong>
                                     </a>
                                     <?php if ( $item['title'] && $item['title'] !== $item['filename'] ) : ?>
-                                        <br><span class="mut-meta"><?php echo esc_html( $item['title'] ); ?></span>
+                                        <br><span class="text-xs text-gray-500"><?php echo esc_html( $item['title'] ); ?></span>
                                     <?php endif; ?>
+                                    <br><span class="text-xs text-gray-400 md:hidden"><?php echo esc_html( $item['upload_date'] ); ?></span>
                                 </td>
-                                <td class="mut-td-type">
-                                    <span class="mut-type-badge mut-type-<?php echo esc_attr( strtolower( $item['mime_label'] ) ); ?>">
+                                <td class="order-4 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-5 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
                                         <?php echo esc_html( $item['mime_label'] ); ?>
                                     </span>
                                 </td>
-                                <td class="mut-td-date"><?php echo esc_html( $item['upload_date'] ); ?></td>
-                                <td class="mut-td-size"><?php echo esc_html( $item['filesize'] ); ?></td>
-                                <td class="mut-td-count mut-cell-count">
-                                    <span class="mut-count <?php echo $count > 0 ? 'mut-count-used' : 'mut-count-zero'; ?>">
+                                <td class="order-6 max-md:hidden md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500"><?php echo esc_html( $item['upload_date'] ); ?></td>
+                                <td class="order-7 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $item['filesize'] ); ?></td>
+                                <td class="order-8 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
+                                    <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white <?php echo $count > 0 ? 'bg-emerald-600' : 'bg-gray-400'; ?>">
                                         <?php echo $count; ?>
                                     </span>
                                 </td>
-                                <td class="mut-td-status">
+                                <td class="order-9 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
                                     <?php if ( $count > 0 ) : ?>
-                                        <a href="<?php echo esc_url( $detail_url ); ?>" style="text-decoration:none;" title="View usage locations">
-                                            <span class="mut-status-badge mut-status-used">In Use</span>
+                                        <a href="<?php echo esc_url( $detail_url ); ?>" class="no-underline" title="View usage locations">
+                                            <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
                                         </a>
                                     <?php else : ?>
-                                        <span class="mut-status-badge mut-status-unused">Unused</span>
+                                        <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="mut-td-actions mut-actions-cell">
-                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="button button-small mut-act-desk" title="View Usage">👁 View</a>
+                                <td class="order-10 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-11 md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle flex gap-1.5 md:whitespace-nowrap">
+                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="button button-small" title="View Usage">👁 View</a>
                                     <?php if ( $is_unused_filter ) : ?>
-                                    <button type="button" class="button button-small mut-delete-btn mut-act-desk"
+                                    <button type="button" class="button button-small mut-delete-btn text-[#d63638] border-[#d63638]"
                                         data-id="<?php echo esc_attr( $item['id'] ); ?>"
                                         data-name="<?php echo $filename; ?>"
-                                        title="Move to Trash" style="color:#d63638;">🗑️</button>
+                                        title="Move to Trash">🗑️</button>
                                     <?php endif; ?>
-                                    <div class="mut-mob-actions">
-                                        <a href="<?php echo esc_url( $detail_url ); ?>" class="mut-mob-btn">View usage</a>
-                                        <?php if ( $is_unused_filter ) : ?>
-                                        <button type="button" class="mut-mob-btn mut-mob-btn-del mut-delete-btn"
-                                            data-id="<?php echo esc_attr( $item['id'] ); ?>"
-                                            data-name="<?php echo $filename; ?>">Delete</button>
-                                        <?php endif; ?>
-                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
@@ -326,7 +322,6 @@ class MediaSearch {
             font-size: 13px;
         }
         .mut-bulk-selected-count { font-weight: 600; color: #2271b1; min-width: 80px; }
-        .mut-col-cb { width: 36px !important; }
         </style>
 
         <script>

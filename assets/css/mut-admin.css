@@ -5,10 +5,6 @@
 
 /* Clickable list rows */
 .mut-list-row:hover td { background: #f0f6fc; }
-.mut-filename-link      { text-decoration: none; color: #1d2327; }
-.mut-filename-link:hover { color: #0073aa; text-decoration: underline; }
-
-
 .mut-detail-back{padding-bottom: 20px;}
 
 /* ============================================================
@@ -22,11 +18,6 @@
                   width: 32px; height: 32px; min-width: 32px; flex-shrink: 0;
                   background: #0073aa; color: #fff; border-radius: 50%;
                   font-size: 13px; font-weight: bold; line-height: 1; padding: 0; }
-.mut-context    { color: #555; font-size: 12px; font-style: italic; }
-
-/* List table */
-.mut-list-table td { vertical-align: middle; }
-
 /* ============================================================
    Usage Details — single attachment header
    ============================================================ */
@@ -85,24 +76,6 @@
 }
 
 .mut-detail-actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
-/* ============================================================
-   Usage Type badges
-   ============================================================ */
-.mut-usage-type {
-    display: inline-block;
-    padding: 2px 8px;
-    border-radius: 10px;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    background: #f0f0f1;
-    color: #3c434a;
-}
-
-/* Locations table */
-.mut-locations-table td { vertical-align: middle; }
 
 /* ============================================================
    Cleanup Suggestions page
@@ -247,9 +220,6 @@ a.mut-cs-pill:hover {
     margin: 0;
 }
 
-/* Table inside section */
-.mut-cs-table { border: none !important; box-shadow: none !important; }
-.mut-cs-table td { vertical-align: middle; }
 
 /* MIME type label */
 .mut-cs-mime {
@@ -420,56 +390,6 @@ a.mut-cs-pill:hover {
     color: #888;
 }
 
-/* Shared table column widths + count badge — used by Media Usage & Search */
-.mut-col-thumb   { width: 72px !important; }
-.mut-col-type    { width: 120px !important; }
-.mut-col-date    { width: 130px !important; }
-.mut-col-size    { width: 90px !important; }
-.mut-col-status  { width: 110px !important; }
-.mut-col-actions { width: 160px !important; }
-.mut-col-count   { width: 120px !important; text-align: center !important; }
-.mut-cell-count  { text-align: center !important; }
-.mut-count {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    font-size: 13px;
-    font-weight: 700;
-    color: #fff;
-    text-decoration: none;
-}
-.mut-count-used { background: #00a32a; }
-.mut-count-zero { background: #646970; }
-
-/* Results table */
-.mut-search-table,
-.mut-list-table,
-.mut-cs-table,
-.mut-bulk-table,
-.mut-dup-table,
-.mut-qd-table,
-.mut-trash-table,
-.mut-locations-table { min-width: 900px; table-layout: auto; }
-.mut-search-table td,
-.mut-list-table td { vertical-align: middle; }
-
-/* Status badges */
-.mut-status-badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.4px;
-    
-}
-.mut-status-used   { background: #d1f0d1; color: #1a5a1a; border: none; padding: 3px 10px;
-    border-radius: 12px;}
-.mut-status-unused { background: #e8e8e8; color: #666; border: none; }
-.mut-status-inuse{background: #d1f0d1 !important; color: #1a5a1a;}
 /* No results */
 .mut-no-results {
     background: #fff;
@@ -573,11 +493,6 @@ a.mut-cs-pill:hover {
 .mut-bulk-toolbar-right {
     margin-left: auto;
 }
-
-/* Table */
-.mut-bulk-table { border-top: none !important; }
-.mut-bulk-table td { vertical-align: middle; }
-.mut-cb-col { width: 32px !important; }
 
 /* Row status tints */
 .mut-row-flagged  > td { background-color: #fffbf0 !important; }
@@ -734,8 +649,6 @@ a.mut-cs-pill:hover {
 	border-radius: 0 4px 4px 0;
 	margin-bottom: 12px;
 }
-.mut-dup-table { margin: 0; }
-.mut-dup-row-action { vertical-align: middle; }
 
 /* Dashboard duplicate card */
 .mut-card-duplicates { border-left-color: #f0720b !important; }
@@ -764,10 +677,14 @@ a.mut-cs-pill:hover {
 	background: #fff; border: 1px solid #e0e0e0; border-radius: 10px;
 	padding: 20px; text-align: center; box-shadow: 0 1px 4px rgba(0,0,0,.05);
 }
-.mut-opt-stat-num { display: block; font-size: 2em; font-weight: 700; color: #1d2327; }
+.mut-opt-stat-num { display: block; font-size: 2em; font-weight: 700; color: #1d2327; line-height: 1.25; }
 .mut-opt-stat-label {
-	display: block; margin-top: 4px; font-size: 11px; text-transform: uppercase;
+	display: block; margin-top: 6px; font-size: 11px; text-transform: uppercase;
 	letter-spacing: .04em; color: #787c82; font-weight: 600;
+}
+
+@media screen and (max-width: 480px) {
+	.mut-opt-stat-num { font-size: 1.5em; }
 }
 .mut-opt-stat--recoverable .mut-opt-stat-num { color: #f0720b; }
 .mut-opt-stat--pct .mut-opt-stat-num { color: #2271b1; }
@@ -936,9 +853,6 @@ a.mut-cs-pill:hover {
 /* ============================================================
    Trash Bin page
    ============================================================ */
-.mut-trash-intro { color: #50575e; max-width: 640px; }
-.mut-trash-summary { display: flex; gap: 24px; margin: 12px 0 16px; font-size: 13px; color: #50575e; }
-.mut-status-restorable { background: #d7f5e0; color: #1a7a3a; }
 
 /* ============================================================
    Media Quality Audit page
@@ -1039,8 +953,6 @@ a.mut-cs-pill:hover {
 .mut-qd-alt-input { font-size: 12px !important; padding: 3px 6px !important; height: auto !important; }
 .mut-qd-inline-review { border-top: 1px solid #dcdcde; padding-top: 6px; }
 
-/* Usage badge link wrapper — Quality Detail page */
-.mut-status-badge:hover { opacity: 0.85; }
 .mut-alttext-review-actions { display: flex; align-items: center; padding-top: 8px; }
 
 /* Natural Language Search bar — Search & Filter Media */
@@ -1077,18 +989,6 @@ a.mut-cs-pill:hover {
     padding-left: 30px;
 }
 
-/* Trash Bin — bulk action toolbar */
-.mut-trash-bulk-bar {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 8px 12px;
-    margin-bottom: 8px;
-    background: #f0f6fc;
-    border: 1px solid #c3d4e9;
-    border-radius: 4px;
-    font-size: 13px;
-}
 
 /* Back to Top button */
 #mut-back-to-top {
@@ -1117,164 +1017,3 @@ a.mut-cs-pill:hover {
     visibility: visible;
 }
 
-/* ═══════════════════════════════════════════════════════════
-   SHARED RESPONSIVE — all MUT tables with mut-td-* classes
-   ═══════════════════════════════════════════════════════════ */
-.mut-mob-actions { display: none; }
-
-/* ── TABLET (783px – 1100px) ─────────────────────────────── */
-@media screen and (min-width: 783px) and (max-width: 1100px) {
-    .mut-search-table,
-    .mut-cs-table,
-    .mut-bulk-table,
-    .mut-dup-table,
-    .mut-qd-table,
-    .mut-trash-table { min-width: 0 !important; border: none; box-shadow: none; }
-
-    .mut-search-table thead,
-    .mut-cs-table thead,
-    .mut-bulk-table thead,
-    .mut-dup-table thead,
-    .mut-trash-table thead { display: none; }
-
-    .mut-search-table tbody tr,
-    .mut-cs-table tbody tr,
-    .mut-bulk-table tbody tr,
-    .mut-dup-table tbody tr,
-    .mut-trash-table tbody tr {
-        display: flex; flex-wrap: nowrap; align-items: center;
-        background: #fff; border: 1px solid #e0e0e0;
-        border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
-        position: relative; overflow: hidden;
-        transition: background 0.15s;
-    }
-    .mut-search-table tbody tr:hover,
-    .mut-cs-table tbody tr:hover,
-    .mut-bulk-table tbody tr:hover,
-    .mut-dup-table tbody tr:hover,
-    .mut-trash-table tbody tr:hover { background: #f9f9f9; }
-
-    .mut-search-table tbody tr td,
-    .mut-cs-table tbody tr td,
-    .mut-bulk-table tbody tr td,
-    .mut-dup-table tbody tr td,
-    .mut-trash-table tbody tr td { border: none; padding: 0; }
-
-    .mut-td-thumb { order: 1; width: 44px; flex-shrink: 0; margin-right: 16px; }
-    .mut-td-thumb img { width: 44px !important; height: 44px !important; border-radius: 6px !important; }
-    .mut-td-filename { order: 2; flex: 1; min-width: 0; }
-    .mut-td-filename .mut-filename-link strong {
-        display: block; white-space: nowrap; overflow: hidden;
-        text-overflow: ellipsis; font-size: 14px;
-    }
-    .mut-td-status { order: 3; flex-shrink: 0; display: inline-flex !important; align-items: center; margin-left: 12px; }
-
-    .mut-td-type,
-    .mut-td-size,
-    .mut-td-count,
-    .mut-td-date { display: none !important; }
-
-    .mut-td-actions {
-        order: 4; position: absolute; right: 0; top: 0; bottom: 0;
-        display: flex !important; align-items: center; gap: 2px;
-        padding: 0 8px 0 24px;
-        background: linear-gradient(to right, transparent, #f9f9f9 20px);
-        opacity: 0; transition: opacity 0.15s; white-space: nowrap;
-    }
-    tr:hover > .mut-td-actions,
-    tr.mut-tab-active > .mut-td-actions { opacity: 1; }
-
-    .mut-act-desk {
-        display: inline-flex !important; align-items: center; justify-content: center;
-        min-width: 36px; height: 36px; padding: 0 8px; border-radius: 6px;
-        border: 1px solid #dcdcde; background: #fff; color: #1d2327;
-        cursor: pointer; font-size: 13px; transition: background 0.1s;
-    }
-    .mut-act-desk:hover { background: #f0f0f1; }
-    .mut-mob-actions { display: none !important; }
-    .mut-ud-cb-col,
-    .mut-col-cb { display: none !important; }
-}
-
-/* ── MOBILE (< 782px) ────────────────────────────────────── */
-@media screen and (max-width: 782px) {
-    .mut-search-table,
-    .mut-cs-table,
-    .mut-bulk-table,
-    .mut-dup-table,
-    .mut-qd-table,
-    .mut-trash-table { min-width: 0 !important; border: none; box-shadow: none; }
-
-    .mut-search-table thead,
-    .mut-cs-table thead,
-    .mut-bulk-table thead,
-    .mut-dup-table thead,
-    .mut-trash-table thead { display: none; }
-
-    .mut-search-table tbody tr,
-    .mut-cs-table tbody tr,
-    .mut-bulk-table tbody tr,
-    .mut-dup-table tbody tr,
-    .mut-trash-table tbody tr {
-        display: flex; flex-direction: column;
-        background: #fff; border: 1px solid #e0e0e0;
-        border-radius: 12px; padding: 16px; margin-bottom: 12px;
-    }
-    .mut-search-table tbody tr td,
-    .mut-cs-table tbody tr td,
-    .mut-bulk-table tbody tr td,
-    .mut-dup-table tbody tr td,
-    .mut-trash-table tbody tr td { border: none; padding: 0; }
-
-    .mut-td-thumb { order: 1; text-align: center; margin-bottom: 12px; }
-    .mut-td-thumb img { width: 80px !important; height: 80px !important; border-radius: 8px !important; }
-    .mut-td-thumb .mut-file-icon { width: 80px; height: 80px; font-size: 14px; margin: 0 auto; }
-    .mut-td-filename { order: 2; margin-bottom: 12px; }
-    .mut-td-filename .mut-filename-link strong {
-        font-size: 15px; white-space: normal; word-break: break-word;
-    }
-
-    .mut-td-type   { order: 3; }
-    .mut-td-size   { order: 4; }
-    .mut-td-date   { order: 5; }
-    .mut-td-count  { order: 6; }
-    .mut-td-status { order: 7; }
-
-    .mut-td-type, .mut-td-size, .mut-td-date,
-    .mut-td-count, .mut-td-status {
-        display: flex !important; align-items: center;
-        font-size: 13px; gap: 8px; margin-bottom: 6px;
-        background: none !important; padding: 0 !important;
-        border-radius: 0 !important; color: #1d2327;
-    }
-    .mut-td-type::before   { content: 'Type';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-    .mut-td-size::before   { content: 'Size';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-    .mut-td-date::before   { content: 'Date';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-    .mut-td-count::before  { content: 'Uses';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-    .mut-td-status::before { content: 'Status'; color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-
-    .mut-td-actions {
-        order: 20; margin-top: 12px; padding-top: 12px;
-        border-top: 1px solid #f0f0f1;
-    }
-    .mut-act-desk { display: none !important; }
-    .mut-mob-actions {
-        display: flex !important; flex-direction: column;
-        border: 1px solid #c3c4c7; border-radius: 8px; overflow: hidden;
-    }
-    .mut-mob-btn {
-        display: block; width: 100%; padding: 12px 10px;
-        min-height: 44px; box-sizing: border-box;
-        border: none; border-bottom: 1px solid #e8e8e8;
-        background: #fff; color: #1d2327;
-        font-size: 13px; font-weight: 600; line-height: 20px;
-        text-decoration: none; text-align: center; cursor: pointer;
-    }
-    .mut-mob-btn:last-child { border-bottom: none; }
-    .mut-mob-btn:hover { background: #f6f7f7; }
-    .mut-mob-btn-del { color: #d63638; }
-    .mut-mob-btn-del:hover { background: #fef1f1; }
-
-    .mut-ud-cb-col,
-    .mut-col-cb { display: none !important; }
-}

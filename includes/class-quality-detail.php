@@ -137,32 +137,32 @@ class QualityDetail {
 				</div>
 			<?php else : ?>
 
-				<div style="overflow-x:auto;">
-				<table class="wp-list-table widefat striped mut-qd-table">
-					<thead>
-						<tr>
+				<div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+				<table class="mut-qd-table w-full block md:table text-sm text-left text-gray-700">
+					<thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+						<tr class="md:table-row">
 							<?php if ( in_array( $check_key, array( 'alt_text', 'caption' ), true ) && $ai_ready ) : ?>
-								<th style="width:32px;"><input type="checkbox" id="mut-cb-header" title="Select all on this page"></th>
+								<th class="md:table-cell md:w-[4%] px-4 py-3"><input type="checkbox" id="mut-cb-header" class="h-4 w-4 accent-indigo-600" title="Select all on this page"></th>
 							<?php endif; ?>
-							<th style="width:64px;">Thumb</th>
-							<th>Filename</th>
-							<th style="width:80px;">Type</th>
-							<th style="width:110px;">Upload Date</th>
-							<th style="width:90px;">File Size</th>
-							<th style="width:110px;">Status</th>
+							<th class="md:table-cell md:w-[8%] px-4 py-3">Thumb</th>
+							<th class="md:table-cell md:w-[24%] px-4 py-3">Filename</th>
+							<th class="md:table-cell md:w-[8%] px-4 py-3">Type</th>
+							<th class="md:table-cell md:w-[12%] px-4 py-3">Upload Date</th>
+							<th class="md:table-cell md:w-[8%] px-4 py-3">File Size</th>
+							<th class="md:table-cell md:w-[12%] px-4 py-3">Status</th>
 							<?php if ( $check_key === 'alt_text' ) : ?>
-								<th style="width:220px;">Current Alt Text</th>
+								<th class="md:table-cell md:w-[20%] px-4 py-3">Current Alt Text</th>
 							<?php endif; ?>
 							<?php if ( $check_key === 'caption' ) : ?>
-								<th style="width:220px;">Current Caption</th>
+								<th class="md:table-cell md:w-[20%] px-4 py-3">Current Caption</th>
 							<?php endif; ?>
 							<?php if ( $check_key === 'alt_text' ) : ?>
-								<th style="width:100px;">Decorative?</th>
+								<th class="md:table-cell md:w-[12%] px-4 py-3">Decorative?</th>
 							<?php endif; ?>
-							<th style="width:80px;">Edit</th>
+							<th class="md:table-cell md:w-[10%] px-4 py-3">Edit</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
 						<?php foreach ( $page_ids as $id ) :
 							$id        = (int) $id;
 							$post      = get_post( $id );
@@ -178,7 +178,7 @@ class QualityDetail {
 							}
 							$media_url = admin_url( 'upload.php?item=' . $id );
 							$thumb     = wp_get_attachment_image( $id, array( 48, 48 ), true, array(
-								'style' => 'width:48px;height:48px;object-fit:cover;border-radius:4px;display:block;',
+								'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
 							) );
 							$type_label    = $this->mime_short( $mime );
 							$alt_text      = $check_key === 'alt_text' ? (string) get_post_meta( $id, '_wp_attachment_image_alt', true ) : null;
@@ -187,42 +187,51 @@ class QualityDetail {
 							$usage_count   = $usage_counts[ $id ] ?? 0;
 							$usage_url     = admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $id );
 						?>
-						<tr data-id="<?php echo esc_attr( $id ); ?>" data-inuse="<?php echo $usage_count > 0 ? '1' : '0'; ?>">
+						<tr data-id="<?php echo esc_attr( $id ); ?>" data-inuse="<?php echo $usage_count > 0 ? '1' : '0'; ?>"
+							class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
 							<?php if ( in_array( $check_key, array( 'alt_text', 'caption' ), true ) && $ai_ready ) : ?>
-								<td style="text-align:center;vertical-align:middle;">
-									<input type="checkbox" class="mut-cb-row" value="<?php echo esc_attr( $id ); ?>">
+								<td class="order-1 md:table-cell md:w-[4%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+									<input type="checkbox" class="mut-cb-row h-4 w-4 accent-indigo-600" value="<?php echo esc_attr( $id ); ?>">
 								</td>
 							<?php endif; ?>
-							<td>
+							<td class="order-2 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
 								<?php if ( $thumb ) : ?>
 									<a href="<?php echo esc_url( $media_url ); ?>"><?php echo $thumb; ?></a>
 								<?php else : ?>
-									<span class="mut-file-icon"><?php echo esc_html( strtoupper( $type_label ) ); ?></span>
+									<span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-[10px] font-semibold text-gray-500"><?php echo esc_html( strtoupper( $type_label ) ); ?></span>
 								<?php endif; ?>
 							</td>
-							<td>
-								<a href="<?php echo esc_url( $media_url ); ?>" class="mut-filename-link">
+							<td class="order-3 flex-1 min-w-0 md:table-cell md:w-[24%] md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
+								<a href="<?php echo esc_url( $media_url ); ?>" class="text-gray-900 hover:text-indigo-600 no-underline">
 									<strong><?php echo esc_html( $name ); ?></strong>
-								</a><br>
-								<span class="mut-meta"><?php echo esc_html( $post->post_title ); ?></span>
+								</a>
+								<br><span class="text-xs text-gray-500"><?php echo esc_html( $post->post_title ); ?></span>
+								<br><span class="text-xs text-gray-400 md:hidden"><?php echo esc_html( $date ); ?></span>
 							</td>
-							<td><?php echo esc_html( $type_label ); ?></td>
-							<td><?php echo esc_html( $date ); ?></td>
-							<td><?php echo esc_html( $size ); ?></td>
-							<td>
+							<td class="order-4 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+							<td class="order-5 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+								<span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600"><?php echo esc_html( $type_label ); ?></span>
+							</td>
+							<td class="order-6 max-md:hidden md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500"><?php echo esc_html( $date ); ?></td>
+							<td class="order-7 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $size ); ?></td>
+							<td class="order-8 md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
 								<?php if ( $usage_count > 0 ) : ?>
-									<a href="<?php echo esc_url( $usage_url ); ?>" style="text-decoration:none;" title="View usage locations">
-										<span class="mut-status-badge mut-status-used">In Use</span>
-									</a>
-									<?php if ( $usage_count > 1 ) : ?>
-										<br><span class="mut-meta" style="font-size:11px;"><?php echo $usage_count; ?> locations</span>
-									<?php endif; ?>
+									<span class="inline-block">
+										<a href="<?php echo esc_url( $usage_url ); ?>" class="no-underline" title="View usage locations">
+											<span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
+										</a>
+										<?php if ( $usage_count > 1 ) : ?>
+											<span class="block text-[11px] text-gray-500"><?php echo $usage_count; ?> locations</span>
+										<?php endif; ?>
+									</span>
 								<?php else : ?>
-									<span class="mut-status-badge mut-status-unused">Unused</span>
+									<span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
 								<?php endif; ?>
 							</td>
+							<td class="order-9 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
 							<?php if ( $check_key === 'alt_text' ) : ?>
-								<td class="mut-qd-alttext-cell" data-id="<?php echo esc_attr( $id ); ?>">
+								<td class="order-10 mut-qd-alttext-cell w-full md:w-[20%] md:table-cell px-0 md:px-4 py-1 md:py-3 md:align-middle" data-id="<?php echo esc_attr( $id ); ?>">
+									<span class="block text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Current Alt Text</span>
 									<?php if ( $alt_text !== '' ) : ?>
 										<span class="mut-qd-alt-current" style="color:#787c82;font-style:italic;"><?php echo esc_html( $alt_text ); ?></span>
 									<?php else : ?>
@@ -248,7 +257,8 @@ class QualityDetail {
 								</td>
 							<?php endif; ?>
 							<?php if ( $check_key === 'caption' ) : ?>
-								<td class="mut-qd-caption-cell" data-id="<?php echo esc_attr( $id ); ?>">
+								<td class="order-11 mut-qd-caption-cell w-full md:w-[20%] md:table-cell px-0 md:px-4 py-1 md:py-3 md:align-middle" data-id="<?php echo esc_attr( $id ); ?>">
+									<span class="block text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Current Caption</span>
 									<?php if ( $caption !== '' ) : ?>
 										<span class="mut-qd-caption-current" style="color:#787c82;font-style:italic;"><?php echo esc_html( $caption ); ?></span>
 									<?php else : ?>
@@ -274,7 +284,7 @@ class QualityDetail {
 								</td>
 							<?php endif; ?>
 							<?php if ( $check_key === 'alt_text' ) : ?>
-								<td>
+								<td class="order-12 block md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
 									<button class="button button-small mut-mark-decorative"
 										data-id="<?php echo esc_attr( $id ); ?>"
 										data-decorative="<?php echo $is_decorative ? '1' : '0'; ?>">
@@ -282,7 +292,7 @@ class QualityDetail {
 									</button>
 								</td>
 							<?php endif; ?>
-							<td>
+							<td class="order-13 block md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
 								<?php if ( $edit_link ) : ?>
 									<a href="<?php echo esc_url( $edit_link ); ?>" class="button button-small">Edit</a>
 								<?php endif; ?>
@@ -291,7 +301,7 @@ class QualityDetail {
 						<?php endforeach; ?>
 					</tbody>
 				</table>
-t				</div>
+				</div>
 
 				<?php if ( $pages > 1 ) : ?>
 					<div class="mut-qd-pagination" style="margin-top:16px;">

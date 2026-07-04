@@ -130,52 +130,55 @@ class CleanupSuggestions {
 						</div>
 					<?php endif; ?>
 
-					<div style="overflow-x:auto;">
-					<table class="wp-list-table widefat striped mut-cs-table" id="mut-cs-table-<?php echo esc_attr( $category ); ?>">
-						<thead>
-							<tr>
-								<th style="width:36px;"><input type="checkbox" class="mut-cs-select-all" data-category="<?php echo esc_attr( $category ); ?>" title="Select all"></th>
-								<th style="width:70px;">Thumbnail</th>
-								<th>Filename</th>
-								<th style="width:140px;">Upload Date</th>
-								<th style="width:100px;">File Size</th>
-								<th style="width:80px;">Actions</th>
+					<div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+					<table class="mut-cs-table w-full block md:table text-sm text-left text-gray-700" id="mut-cs-table-<?php echo esc_attr( $category ); ?>">
+						<thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+							<tr class="md:table-row">
+								<th class="md:table-cell w-9 px-4 py-3"><input type="checkbox" class="mut-cs-select-all h-4 w-4 accent-indigo-600" data-category="<?php echo esc_attr( $category ); ?>" title="Select all"></th>
+								<th class="md:table-cell w-20 px-4 py-3">Thumbnail</th>
+								<th class="md:table-cell md:w-64 px-4 py-3">Filename</th>
+								<th class="md:table-cell w-36 px-4 py-3">Upload Date</th>
+								<th class="md:table-cell w-24 px-4 py-3">File Size</th>
+								<th class="md:table-cell w-24 px-4 py-3">Actions</th>
 							</tr>
 						</thead>
-						<tbody>
+						<tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
 							<?php foreach ( $items as $item ) : ?>
-								<tr data-id="<?php echo esc_attr( $item['id'] ); ?>" data-category="<?php echo esc_attr( $category ); ?>">
-									<td class="mut-ud-cb-col"><input type="checkbox" class="mut-cs-select-row" data-category="<?php echo esc_attr( $category ); ?>" value="<?php echo esc_attr( $item['id'] ); ?>" data-name="<?php echo esc_attr( $item['filename'] ); ?>"></td>
-									<td class="mut-td-thumb">
+								<tr data-id="<?php echo esc_attr( $item['id'] ); ?>" data-category="<?php echo esc_attr( $category ); ?>"
+									class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+									<td class="order-1 md:table-cell px-0 md:px-4 py-1 md:py-3 md:align-middle">
+										<input type="checkbox" class="mut-cs-select-row h-4 w-4 accent-indigo-600" data-category="<?php echo esc_attr( $category ); ?>" value="<?php echo esc_attr( $item['id'] ); ?>" data-name="<?php echo esc_attr( $item['filename'] ); ?>">
+									</td>
+									<td class="order-2 md:table-cell px-0 md:px-4 py-1 md:py-3 md:align-middle">
 										<?php
 										$thumb = wp_get_attachment_image( $item['id'], array( 55, 55 ), true, array(
-											'style' => 'width:55px;height:55px;object-fit:cover;border-radius:4px;display:block;',
+											'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
 										) );
-										echo $thumb ?: '<span class="mut-no-thumb"></span>';
+										echo $thumb ?: '<span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-lg">📄</span>';
 										?>
 									</td>
-									<td class="mut-td-filename">
-										<strong><?php echo esc_html( $item['filename'] ); ?></strong><br>
-										<span class="mut-meta"><?php echo esc_html( $item['title'] ); ?></span>
+									<td class="order-3 flex-1 min-w-0 md:table-cell md:w-64 md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
+										<strong class="font-medium text-gray-900"><?php echo esc_html( $item['filename'] ); ?></strong>
+										<br><span class="text-xs text-gray-500"><?php echo esc_html( $item['title'] ); ?></span>
 									</td>
-									<td class="mut-td-date"><?php echo esc_html( $item['modified_date'] ); ?></td>
-									<td class="mut-td-size"><?php echo esc_html( $item['filesize'] ); ?></td>
-									<td class="mut-td-actions mut-actions-cell">
-										<button type="button" class="button button-small mut-delete-btn mut-act-desk"
+									<td class="order-4 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+									<td class="order-5 md:table-cell w-36 px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500">
+										<?php echo esc_html( $item['modified_date'] ); ?>
+									</td>
+									<td class="order-6 md:table-cell w-24 px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
+										<?php echo esc_html( $item['filesize'] ); ?>
+									</td>
+									<td class="order-7 ml-auto md:table-cell md:ml-0 w-24 px-0 md:px-4 py-1 md:py-3 md:align-middle">
+										<button type="button" class="button button-small mut-delete-btn"
 											data-id="<?php echo esc_attr( $item['id'] ); ?>"
 											data-name="<?php echo esc_attr( $item['filename'] ); ?>"
-											title="Safely delete this file">🗑️</button>
-										<div class="mut-mob-actions">
-											<button type="button" class="mut-mob-btn mut-mob-btn-del mut-delete-btn"
-												data-id="<?php echo esc_attr( $item['id'] ); ?>"
-												data-name="<?php echo esc_attr( $item['filename'] ); ?>">Delete</button>
-										</div>
+											title="Safely delete this file">🗑️ Delete</button>
 									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
 					</table>
-t				</div>
+					</div>
 
 					<?php if ( $count > 0 ) : ?>
 						<div class="mut-cs-bulk-bar">

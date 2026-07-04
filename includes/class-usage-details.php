@@ -43,22 +43,22 @@ class UsageDetails {
         $count_unused = $count_all - $count_used;
         ?>
         <div class="wrap mut-usage-details">
-            <h1>Media Usage</h1>
+            <h1>🗂️ Media Usage</h1>
             <p id="mut-ud-found" class="mut-ud-found-text"><?php echo number_format( $count_all ); ?> media files found.</p>
 
             <div class="mut-ud-stats-bar">
-                <div class="mut-ud-stat">
+                <button type="button" class="mut-ud-stat active" data-filter="">
                     <div class="mut-ud-stat-num mut-ud-stat-blue"><?php echo number_format( $count_all ); ?></div>
                     <div class="mut-ud-stat-label">Total</div>
-                </div>
-                <div class="mut-ud-stat">
+                </button>
+                <button type="button" class="mut-ud-stat" data-filter="used">
                     <div class="mut-ud-stat-num mut-ud-stat-green"><?php echo number_format( $count_used ); ?></div>
                     <div class="mut-ud-stat-label">In use</div>
-                </div>
-                <div class="mut-ud-stat">
+                </button>
+                <button type="button" class="mut-ud-stat" data-filter="unused">
                     <div class="mut-ud-stat-num mut-ud-stat-red"><?php echo number_format( $count_unused ); ?></div>
                     <div class="mut-ud-stat-label">Unused</div>
-                </div>
+                </button>
             </div>
 
             <div class="mut-quick-chips" style="margin-bottom:16px;">
@@ -85,24 +85,24 @@ class UsageDetails {
                     <button type="button" id="mut-ud-bulk-trash" class="button" disabled style="margin-left:12px;">🗑️ Move to Trash</button>
                 </div>
 
-                <div style="overflow-x:auto;">
-                <table class="wp-list-table widefat striped mut-list-table" id="mut-ud-table">
-                    <thead>
-                        <tr>
-                            <th style="width:32px;display:none;" id="mut-ud-cb-th" class="mut-ud-cb-col">
-                                <input type="checkbox" id="mut-ud-select-all-th">
+                <div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+                <table class="mut-list-table w-full block md:table text-sm text-left text-gray-700" id="mut-ud-table">
+                    <thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <tr class="md:table-row">
+                            <th style="display:none;" id="mut-ud-cb-th" class="mut-ud-cb-col md:table-cell md:w-[4%] px-4 py-3">
+                                <input type="checkbox" id="mut-ud-select-all-th" class="h-4 w-4 accent-indigo-600">
                             </th>
-                            <th class="mut-col-thumb">Thumbnail</th>
-                            <th>Filename</th>
-                            <th class="mut-col-type">Media Type</th>
-                            <th class="mut-col-date">Upload Date</th>
-                            <th class="mut-col-size">File Size</th>
-                            <th class="mut-col-count">Usage Count</th>
-                            <th class="mut-col-status">Status</th>
-                            <th class="mut-col-actions">Actions</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Thumbnail</th>
+                            <th class="md:table-cell md:w-[28%] px-4 py-3">Filename</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Media Type</th>
+                            <th class="md:table-cell md:w-[12%] px-4 py-3">Upload Date</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">File Size</th>
+                            <th class="md:table-cell md:w-[8%] px-4 py-3">Usage Count</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">Status</th>
+                            <th class="md:table-cell md:w-[14%] px-4 py-3">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                         <?php foreach ( $attachments as $att ) :
                             $id          = absint( $att->ID );
                             $in_use      = isset( $used_ids[ $id ] );
@@ -114,7 +114,7 @@ class UsageDetails {
                                 'export_xlsx' => 'attachment_' . $id,
                             ), admin_url( 'admin.php' ) );
                             $thumb       = wp_get_attachment_image( $id, array( 56, 56 ), true, array(
-                                'style' => 'width:56px;height:56px;object-fit:cover;border-radius:4px;display:block;'
+                                'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
                             ) );
                             $filename    = basename( get_attached_file( $id ) ) ?: $att->post_title;
                             $upload_date = get_the_date( 'M j, Y', $id );
@@ -128,67 +128,70 @@ class UsageDetails {
                             // broken-image box; fall back to the labelled type icon instead.
                             $show_thumb  = $thumb && ( ! $is_image || ( $file_path && file_exists( $file_path ) ) );
                         ?>
-                            <tr data-id="<?php echo esc_attr( $id ); ?>" data-inuse="<?php echo $in_use ? '1' : '0'; ?>">
-                                <td class="mut-ud-cb-col" style="display:none;text-align:center;vertical-align:middle;">
-                                    <input type="checkbox" class="mut-ud-cb" value="<?php echo esc_attr( $id ); ?>">
+                            <tr data-id="<?php echo esc_attr( $id ); ?>" data-inuse="<?php echo $in_use ? '1' : '0'; ?>"
+                                class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+                                <td class="mut-ud-cb-col order-1 md:table-cell md:w-[4%] px-0 md:px-4 py-1 md:py-3 md:align-middle" style="display:none;">
+                                    <input type="checkbox" class="mut-ud-cb h-4 w-4 accent-indigo-600" value="<?php echo esc_attr( $id ); ?>">
                                 </td>
-                                <td class="mut-td-thumb">
+                                <td class="order-2 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <?php if ( $show_thumb ) : ?>
                                         <a href="<?php echo esc_url( $detail_url ); ?>"><?php echo $thumb; ?></a>
                                     <?php else : ?>
-                                        <span class="mut-file-icon mut-icon-<?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( strtoupper( $type_class ) ); ?></span>
+                                        <span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-[10px] font-semibold text-gray-500"><?php echo esc_html( strtoupper( $type_class ) ); ?></span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="mut-td-filename">
-                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="mut-filename-link">
+                                <td class="order-3 flex-1 min-w-0 md:table-cell md:w-[28%] md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="text-gray-900 hover:text-indigo-600 no-underline">
                                         <strong><?php echo esc_html( $filename ); ?></strong>
-                                    </a><br>
-                                    <span class="mut-meta"><?php echo esc_html( $att->post_title ); ?></span>
+                                    </a>
+                                    <br><span class="text-xs text-gray-500"><?php echo esc_html( $att->post_title ); ?></span>
+                                    <br><span class="text-xs text-gray-400 md:hidden"><?php echo esc_html( $upload_date ); ?></span>
                                 </td>
-                                <td class="mut-td-type">
-                                    <span class="mut-type-badge mut-type-<?php echo esc_attr( $type_class ); ?>">
+                                <td class="order-4 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-5 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
                                         <?php echo esc_html( $type_label ); ?>
                                     </span>
                                 </td>
-                                <td class="mut-td-date"><?php echo esc_html( $upload_date ); ?></td>
-                                <td class="mut-td-size"><?php echo esc_html( $this->get_filesize( $id ) ); ?></td>
-                                <td class="mut-td-count mut-cell-count">
-                                    <span class="mut-count <?php echo $count > 0 ? 'mut-count-used' : 'mut-count-zero'; ?>">
+                                <td class="order-6 max-md:hidden md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500"><?php echo esc_html( $upload_date ); ?></td>
+                                <td class="order-7 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $this->get_filesize( $id ) ); ?></td>
+                                <td class="order-8 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
+                                    <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white <?php echo $count > 0 ? 'bg-emerald-600' : 'bg-gray-400'; ?>">
                                         <?php echo $count; ?>
                                     </span>
                                 </td>
-                                <td class="mut-td-status">
+                                <td class="order-9 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
                                     <?php if ( $in_use ) : ?>
-                                        <a href="<?php echo esc_url( $detail_url ); ?>" style="text-decoration:none;" title="View usage locations">
-                                            <span class="mut-status-badge mut-status-inuse">In Use</span>
+                                        <a href="<?php echo esc_url( $detail_url ); ?>" class="no-underline" title="View usage locations">
+                                            <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
                                         </a>
                                     <?php else : ?>
-                                        <span class="mut-status-badge mut-status-unused">Unused</span>
+                                        <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
                                     <?php endif; ?>
                                 </td>
-                                <td class="mut-td-actions mut-actions-cell">
-                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="button button-small mut-act-desk" title="View Usage">👁 View</a>
-                                    <a href="<?php echo esc_url( $review_url ); ?>" class="button button-small mut-act-desk" title="Review">🚩 Review</a>
+                                <td class="order-10 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                                <td class="order-11 md:table-cell md:w-[14%] px-0 md:px-4 py-1 md:py-3 md:align-middle flex gap-1.5 md:whitespace-nowrap">
+                                    <a href="<?php echo esc_url( $detail_url ); ?>" class="button button-small" title="View Usage">👁 View</a>
+                                    <a href="<?php echo esc_url( $review_url ); ?>" class="button button-small" title="Review">🚩 Review</a>
                                     <?php if ( ! $in_use ) : ?>
-                                        <button type="button" class="button button-small mut-delete-btn mut-ud-del-btn mut-act-desk"
+                                        <button type="button" class="button button-small mut-delete-btn mut-ud-del-btn"
                                             data-id="<?php echo esc_attr( $id ); ?>"
                                             data-name="<?php echo esc_attr( $filename ); ?>"
                                             title="Delete this file">🗑️</button>
                                     <?php endif; ?>
-                                    <div class="mut-mob-actions">
-                                        <a href="<?php echo esc_url( $detail_url ); ?>" class="mut-mob-btn">View usage</a>
-                                        <a href="<?php echo esc_url( $review_url ); ?>" class="mut-mob-btn">Review</a>
-                                        <?php if ( ! $in_use ) : ?>
-                                            <button type="button" class="mut-mob-btn mut-mob-btn-del mut-delete-btn mut-ud-del-btn"
-                                                data-id="<?php echo esc_attr( $id ); ?>"
-                                                data-name="<?php echo esc_attr( $filename ); ?>">Delete</button>
-                                        <?php endif; ?>
-                                    </div>
                                 </td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
+                </div>
+
+                <div class="mut-bulk-toolbar" id="mut-ud-bulk-bar-bottom" style="display:none;margin-top:8px;border-top:1px solid #c3c4c7;border-bottom:1px solid #c3c4c7;">
+                    <label style="font-weight:600;cursor:pointer;">
+                        <input type="checkbox" id="mut-ud-select-all-bottom"> Select All
+                    </label>
+                    <span id="mut-ud-count-bottom" style="margin-left:12px;color:#787c82;">0 selected</span>
+                    <button type="button" id="mut-ud-bulk-trash-bottom" class="button" disabled style="margin-left:12px;">🗑️ Move to Trash</button>
                 </div>
             <?php endif; ?>
         </div>
@@ -198,17 +201,19 @@ class UsageDetails {
         <script>
         (function($){
             var $table    = $('#mut-ud-table');
-            var $bar      = $('#mut-ud-bulk-bar');
+            var $bar      = $('#mut-ud-bulk-bar, #mut-ud-bulk-bar-bottom');
             var $found    = $('#mut-ud-found');
-            var $trashBtn = $('#mut-ud-bulk-trash');
-            var $count    = $('#mut-ud-count');
-            var SELECT_ALL = '#mut-ud-select-all, #mut-ud-select-all-th';
+            var $trashBtn = $('#mut-ud-bulk-trash, #mut-ud-bulk-trash-bottom');
+            var $count    = $('#mut-ud-count, #mut-ud-count-bottom');
+            var SELECT_ALL = '#mut-ud-select-all, #mut-ud-select-all-th, #mut-ud-select-all-bottom';
             var currentFilter = '';
 
             function applyFilter(filter) {
                 currentFilter = filter;
                 $('.mut-ud-pill').removeClass('active');
                 $('.mut-ud-pill[data-filter="' + filter + '"]').addClass('active');
+                $('.mut-ud-stat').removeClass('active');
+                $('.mut-ud-stat[data-filter="' + filter + '"]').addClass('active');
 
                 var visible = 0;
                 $table.find('tbody tr').each(function(){
@@ -239,6 +244,11 @@ class UsageDetails {
 
             // --- Pill filtering ---
             $('.mut-ud-pill').on('click', function(){
+                applyFilter($(this).data('filter'));
+            });
+
+            // --- Stat card filtering (tablet/mobile summary bar) ---
+            $('.mut-ud-stat').on('click', function(){
                 applyFilter($(this).data('filter'));
             });
 
@@ -304,28 +314,7 @@ class UsageDetails {
         </script>
 
         <style>
-        .mut-list-table { min-width: 900px; table-layout: auto; }
-        .mut-col-thumb { width: 72px; }
-        .mut-col-type { width: 100px; }
-        .mut-col-date { width: 120px; }
-        .mut-col-size { width: 80px; }
-        .mut-col-count { width: 100px; }
-        .mut-col-status { width: 90px; }
-        .mut-col-actions { width: 200px; }
-        .mut-file-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 56px; height: 56px;
-            border-radius: 4px;
-            background: #f0f0f1;
-            font-size: 10px;
-            font-weight: 700;
-            color: #646970;
-            letter-spacing: .04em;
-        }
-
-        /* Type badges */
+        /* Type badges (still used by the single-attachment detail view) */
         .mut-type-badge {
             display: inline-block;
             padding: 2px 8px;
@@ -340,29 +329,15 @@ class UsageDetails {
         .mut-type-doc    { background: #ede7f6; color: #4527a0; }
         .mut-type-other  { background: #e2e8f0; color: #334155; }
 
-        /* Status badges — match shared mut-admin.css definition exactly */
-        .mut-status-badge {
-            display: inline-block;
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.4px;
-            border: none;
-        }
-        .mut-status-inuse  { background: #d1f0d1; color: #1a5a1a; }
-        .mut-status-unused { background: #e8e8e8; color: #666; }
-
-        .mut-actions-cell { white-space: nowrap; }
-        .mut-actions-cell .button { margin-right: 3px; }
-        .mut-filename-link { text-decoration: none; color: #1d2327; }
-        .mut-filename-link:hover { color: #2271b1; }
         .mut-meta { font-size: 12px; color: #787c82; }
 
         /* Stats bar — hidden on desktop */
         .mut-ud-stats-bar { display: none; }
-        .mut-mob-actions { display: none; }
+
+        /* Bulk-select checkboxes are a desktop-only feature */
+        @media screen and (max-width: 1100px) {
+            .mut-ud-cb-col { display: none !important; }
+        }
 
         /* ── TABLET + MOBILE: show stats bar ──────────────────── */
         @media screen and (max-width: 1100px) {
@@ -371,8 +346,14 @@ class UsageDetails {
             }
             .mut-ud-stat {
                 flex: 1; background: #f6f7f7; border-radius: 8px;
+                border: 2px solid transparent;
                 padding: 10px; text-align: center;
+                font: inherit; cursor: pointer;
+                -webkit-appearance: none; appearance: none;
             }
+            .mut-ud-stat:hover { background: #edeeee; }
+            .mut-ud-stat:active { background: #e4e5e5; }
+            .mut-ud-stat.active { border-color: #2271b1; background: #f0f6ff; }
             .mut-ud-stat-num { font-size: 20px; font-weight: 700; line-height: 1.2; }
             .mut-ud-stat-blue { color: #2271b1; }
             .mut-ud-stat-green { color: #00a32a; }
@@ -381,134 +362,9 @@ class UsageDetails {
             .mut-ud-found-text { display: none; }
         }
 
-        /* ── TABLET card-rows (783px – 1100px) ─────────────────── */
-        @media screen and (min-width: 783px) and (max-width: 1100px) {
-            .mut-list-table { min-width: 0; border: none; box-shadow: none; }
-            .mut-list-table thead { display: none; }
-            .mut-list-table tbody tr {
-                display: flex; flex-wrap: nowrap; align-items: center;
-                background: #fff; border: 1px solid #e0e0e0;
-                border-radius: 12px; padding: 14px 16px; margin-bottom: 8px;
-                position: relative; overflow: hidden;
-                transition: background 0.15s;
-            }
-            .mut-list-table tbody tr:hover { background: #f9f9f9; }
-            .mut-list-table tbody tr td { border: none; padding: 0; }
-
-            /* Clean row: thumb + filename + status */
-            .mut-td-thumb {
-                order: 1; width: 44px; flex-shrink: 0; margin-right: 16px;
-            }
-            .mut-td-thumb img { width: 44px !important; height: 44px !important; border-radius: 6px !important; }
-            .mut-td-filename {
-                order: 2; flex: 1; min-width: 0;
-            }
-            .mut-td-filename .mut-filename-link strong {
-                display: block; white-space: nowrap; overflow: hidden;
-                text-overflow: ellipsis; font-size: 14px;
-            }
-            .mut-td-status {
-                order: 3; flex-shrink: 0;
-                display: inline-flex !important; align-items: center;
-                margin-left: 12px;
-            }
-
-            /* Hide all metadata */
-            .mut-td-type   { display: none !important; }
-            .mut-td-size   { display: none !important; }
-            .mut-td-count  { display: none !important; }
-            .mut-td-date   { display: none !important; }
-
-            /* Actions: hidden by default, slide in on hover */
-            .mut-td-actions {
-                order: 4; position: absolute; right: 0; top: 0; bottom: 0;
-                display: flex !important; align-items: center; gap: 2px;
-                padding: 0 8px 0 24px;
-                background: linear-gradient(to right, transparent, #f9f9f9 20px);
-                opacity: 0; transition: opacity 0.15s;
-                white-space: nowrap;
-            }
-            .mut-list-table tbody tr:hover .mut-td-actions,
-            .mut-list-table tbody tr.mut-tab-active .mut-td-actions {
-                opacity: 1;
-            }
-            .mut-act-desk {
-                display: inline-flex !important; align-items: center; justify-content: center;
-                min-width: 36px; height: 36px; padding: 0 8px; border-radius: 6px;
-                border: 1px solid #dcdcde; background: #fff; color: #1d2327;
-                cursor: pointer; font-size: 13px; transition: background 0.1s;
-            }
-            .mut-act-desk:hover { background: #f0f0f1; }
-            .mut-act-desk[title="Delete this file"] { border-color: #f0b8b8; color: #d63638; }
-            .mut-act-desk[title="Delete this file"]:hover { background: #fef1f1; }
-            .mut-mob-actions { display: none !important; }
-            .mut-ud-cb-col { display: none !important; }
-        }
-
-        /* ── MOBILE cards (< 782px) ────────────────────────────── */
+        /* ── MOBILE (< 782px) ──────────────────────────────────── */
         @media screen and (max-width: 782px) {
             .mut-quick-chips { overflow-x: auto; white-space: nowrap; -webkit-overflow-scrolling: touch; }
-            .mut-list-table { min-width: 0; border: none; box-shadow: none; }
-            .mut-list-table thead { display: none; }
-            .mut-list-table tbody tr {
-                display: flex; flex-direction: column;
-                background: #fff; border: 1px solid #e0e0e0;
-                border-radius: 12px; padding: 16px; margin-bottom: 12px;
-            }
-            .mut-list-table tbody tr td { border: none; padding: 0; }
-
-            .mut-td-thumb {
-                order: 1; text-align: center; margin-bottom: 12px;
-            }
-            .mut-td-thumb img { width: 80px !important; height: 80px !important; border-radius: 8px !important; }
-            .mut-td-thumb .mut-file-icon { width: 80px; height: 80px; font-size: 14px; margin: 0 auto; }
-            .mut-td-filename { order: 2; margin-bottom: 12px; }
-            .mut-td-filename .mut-filename-link strong {
-                font-size: 15px; white-space: normal; word-break: break-word;
-            }
-            .mut-td-type   { order: 3; }
-            .mut-td-size   { order: 4; }
-            .mut-td-date   { order: 5; }
-            .mut-td-count  { order: 6; }
-            .mut-td-status { order: 7; }
-            .mut-td-type, .mut-td-size, .mut-td-date,
-            .mut-td-count, .mut-td-status {
-                display: flex !important; align-items: center;
-                font-size: 13px; gap: 8px; margin-bottom: 6px;
-                background: none !important; padding: 0 !important;
-                border-radius: 0 !important; color: #1d2327;
-            }
-            .mut-td-type::before   { content: 'Type';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-            .mut-td-size::before   { content: 'Size';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-            .mut-td-date::before   { content: 'Date';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-            .mut-td-count::before  { content: 'Uses';   color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-            .mut-td-status::before { content: 'Status'; color: #787c82; min-width: 55px; flex-shrink: 0; font-size: 12px; }
-
-            .mut-td-actions {
-                order: 20; margin-top: 12px; padding-top: 12px;
-                border-top: 1px solid #f0f0f1;
-            }
-            .mut-act-desk { display: none !important; }
-            .mut-mob-actions {
-                display: flex !important; flex-direction: column; gap: 0;
-            }
-            .mut-mob-actions {
-                border: 1px solid #c3c4c7; border-radius: 8px; overflow: hidden;
-                display: flex !important; flex-direction: column;
-            }
-            .mut-mob-btn {
-                display: block; width: 100%; padding: 12px 10px;
-                min-height: 44px; box-sizing: border-box;
-                border: none; border-bottom: 1px solid #e8e8e8;
-                background: #fff; color: #1d2327;
-                font-size: 13px; font-weight: 600; line-height: 20px;
-                text-decoration: none; text-align: center; cursor: pointer;
-            }
-            .mut-mob-btn:last-child { border-bottom: none; }
-            .mut-mob-btn:hover { background: #f6f7f7; }
-            .mut-mob-btn-del { color: #d63638; }
-            .mut-mob-btn-del:hover { background: #fef1f1; }
-            .mut-ud-cb-col { display: none !important; }
             .mut-bulk-toolbar { flex-wrap: wrap; gap: 8px; }
         }
         </style>
@@ -554,31 +410,27 @@ class UsageDetails {
                 </div>
                 <div class="mut-detail-meta">
                     <h1><?php echo esc_html( $attachment->post_title ); ?></h1>
-                    <table class="mut-meta-table">
-                        <tr><th>File Name</th><td><code><?php echo esc_html( $filename ); ?></code></td></tr>
-                        <tr><th>Media Type</th><td>
+                    <table class="mut-meta-table border-collapse mb-4">
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">File Name</th><td class="py-1.5 align-top text-sm text-gray-900"><code class="rounded bg-gray-100 px-1.5 py-0.5 text-xs"><?php echo esc_html( $filename ); ?></code></td></tr>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Media Type</th><td class="py-1.5 align-top text-sm text-gray-900">
                             <span class="mut-type-badge mut-type-<?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( $type_label ); ?></span>
                         </td></tr>
-                        <tr><th>Upload Date</th><td><?php echo esc_html( $upload_date ); ?></td></tr>
-                        <tr><th>File Size</th><td><?php echo esc_html( $filesize ); ?></td></tr>
-                        <tr><th>Usage Count</th><td><strong><?php echo count( $unique_posts ); ?> post(s)</strong></td></tr>
-                        <tr><th>Status</th><td>
-                            <?php
-                            $badge_base   = 'display:inline-block;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.4px;border:none;';
-                            $badge_inuse  = $badge_base . 'background:#d1f0d1;color:#1a5a1a;';
-                            $badge_unused = $badge_base . 'background:#e8e8e8;color:#666;';
-                            if ( $in_use ) : ?>
-                                <span style="<?php echo esc_attr( $badge_inuse ); ?>">In Use</span>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Upload Date</th><td class="py-1.5 align-top text-sm text-gray-900"><?php echo esc_html( $upload_date ); ?></td></tr>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">File Size</th><td class="py-1.5 align-top text-sm text-gray-900"><?php echo esc_html( $filesize ); ?></td></tr>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Usage Count</th><td class="py-1.5 align-top text-sm text-gray-900"><strong><?php echo count( $unique_posts ); ?> post(s)</strong></td></tr>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Status</th><td class="py-1.5 align-top text-sm text-gray-900">
+                            <?php if ( $in_use ) : ?>
+                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
                             <?php else : ?>
-                                <span style="<?php echo esc_attr( $badge_unused ); ?>">Unused</span>
+                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
                             <?php endif; ?>
                         </td></tr>
                         <?php if ( $is_image ) : ?>
-                        <tr><th>Alt Text</th><td>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Alt Text</th><td class="py-1.5 align-top text-sm text-gray-900">
                             <?php if ( $alt_text ) : ?>
-                                <span style="color:#1d2327;"><?php echo esc_html( $alt_text ); ?></span>
+                                <span class="text-gray-900"><?php echo esc_html( $alt_text ); ?></span>
                             <?php else : ?>
-                                <span style="<?php echo esc_attr( $badge_unused ); ?>">Not Set</span>
+                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Not Set</span>
                             <?php endif; ?>
                         </td></tr>
                         <?php endif; ?>
@@ -600,18 +452,18 @@ class UsageDetails {
                 </div>
             <?php else : ?>
                 <h2>Found in <?php echo count( $unique_posts ); ?> location(s)</h2>
-                <div style="overflow-x:auto;">
-                <table class="wp-list-table widefat striped mut-locations-table">
-                    <thead>
-                        <tr>
-                            <th>Post / Page Title</th>
-                            <th style="width:120px;">Content Type</th>
-                            <th style="width:150px;">Usage Type</th>
-                            <th style="width:200px;">Context</th>
-                            <th style="width:100px;">Edit</th>
+                <div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+                <table class="w-full block md:table text-sm text-left text-gray-700">
+                    <thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        <tr class="md:table-row">
+                            <th class="md:table-cell md:w-[35%] px-4 py-3">Post / Page Title</th>
+                            <th class="md:table-cell md:w-[12%] px-4 py-3">Content Type</th>
+                            <th class="md:table-cell md:w-[18%] px-4 py-3">Usage Type</th>
+                            <th class="md:table-cell md:w-[25%] px-4 py-3">Context</th>
+                            <th class="md:table-cell md:w-[10%] px-4 py-3">Edit</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                         <?php
                         foreach ( $usages as $usage ) :
                             $post        = get_post( $usage->post_id );
@@ -621,39 +473,41 @@ class UsageDetails {
 
                             // Status labels to show next to title (skip 'publish' — that's the default)
                             $status_labels = array(
-                                'draft'   => array( 'label' => 'Draft',   'color' => '#dba617', 'bg' => '#fef9e7' ),
-                                'pending' => array( 'label' => 'Pending', 'color' => '#2271b1', 'bg' => '#f0f6ff' ),
-                                'private' => array( 'label' => 'Private', 'color' => '#787c82', 'bg' => '#f6f7f7' ),
-                                'future'  => array( 'label' => 'Scheduled','color'=> '#8b5cf6', 'bg' => '#f5f0ff' ),
-                                'trash'   => array( 'label' => 'Trash',   'color' => '#d63638', 'bg' => '#fde8e8' ),
+                                'draft'   => array( 'label' => 'Draft',   'classes' => 'bg-amber-100 text-amber-800' ),
+                                'pending' => array( 'label' => 'Pending', 'classes' => 'bg-blue-100 text-blue-800' ),
+                                'private' => array( 'label' => 'Private', 'classes' => 'bg-gray-100 text-gray-600' ),
+                                'future'  => array( 'label' => 'Scheduled', 'classes' => 'bg-purple-100 text-purple-800' ),
+                                'trash'   => array( 'label' => 'Trash',   'classes' => 'bg-red-100 text-red-800' ),
                             );
                             $status_info = $status_labels[ $post_status ] ?? null;
                         ?>
-                            <tr>
-                                <td>
+                            <tr class="block md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+                                <td class="block md:table-cell md:w-[35%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <?php if ( $edit_link ) : ?>
-                                        <a href="<?php echo esc_url( $edit_link ); ?>"><?php echo esc_html( $title ); ?></a>
+                                        <a href="<?php echo esc_url( $edit_link ); ?>" class="text-gray-900 hover:text-indigo-600 no-underline"><?php echo esc_html( $title ); ?></a>
                                     <?php else : ?>
                                         <?php echo esc_html( $title ); ?>
                                     <?php endif; ?>
                                     <?php if ( $status_info ) : ?>
-                                        <span style="display:inline-block;margin-left:6px;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600;background:<?php echo esc_attr( $status_info['bg'] ); ?>;color:<?php echo esc_attr( $status_info['color'] ); ?>;">
+                                        <span class="ml-1.5 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold <?php echo esc_attr( $status_info['classes'] ); ?>">
                                             <?php echo esc_html( $status_info['label'] ); ?>
                                         </span>
                                     <?php endif; ?>
                                 </td>
-                                <td><?php echo esc_html( ucfirst( $usage->post_type ) ); ?></td>
-                                <td>
-                                    <span class="mut-usage-type mut-type-<?php echo esc_attr( $usage->usage_type ); ?>">
+                                <td class="block md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500">
+                                    <span class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Content Type: </span><?php echo esc_html( ucfirst( $usage->post_type ) ); ?>
+                                </td>
+                                <td class="block md:table-cell md:w-[18%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                                    <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
                                         <?php echo esc_html( $this->format_usage_type( $usage->usage_type ) ); ?>
                                     </span>
                                 </td>
-                                <td class="mut-context"><?php echo esc_html( wp_trim_words( $usage->context, 15 ) ); ?></td>
-                                <td>
+                                <td class="block md:table-cell md:w-[25%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500"><?php echo esc_html( wp_trim_words( $usage->context, 15 ) ); ?></td>
+                                <td class="block md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <?php if ( $edit_link ) : ?>
                                         <a href="<?php echo esc_url( $edit_link ); ?>" class="button button-small">Edit</a>
                                     <?php else : ?>
-                                        <span class="mut-meta">—</span>
+                                        <span class="text-xs text-gray-400">—</span>
                                     <?php endif; ?>
                                 </td>
                             </tr>

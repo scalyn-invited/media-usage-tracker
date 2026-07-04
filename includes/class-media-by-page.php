@@ -209,6 +209,7 @@ class MediaByPage {
 				}
 
 				var items = res.data.items;
+				var dominantSource = res.data.dominant_source || '';
 				var html  = '<div class="mut-mbp-grid">';
 				for (var i = 0; i < items.length; i++) {
 					var it = items[i];
@@ -216,7 +217,11 @@ class MediaByPage {
 					html += '<img src="' + it.thumb + '" alt="" loading="lazy">';
 					html += '<div class="mut-mbp-thumb-info">';
 					html += '<div class="mut-mbp-thumb-name" title="' + it.filename + '">' + it.filename + '</div>';
-					html += '<span class="mut-mbp-thumb-source">' + it.source + '</span>';
+					// Only call out the source when it differs from the page's
+					// dominant one (already shown once in the row header).
+					if (it.source !== dominantSource) {
+						html += '<span class="mut-mbp-thumb-source">' + it.source + '</span>';
+					}
 					html += '</div></div>';
 				}
 				html += '</div>';
@@ -387,6 +392,14 @@ class MediaByPage {
 
 		$post = get_post( $post_id );
 
+		// The page's dominant source (e.g. "Elementor" for an Elementor-built
+		// page) is already shown once in the row header, so per-image badges
+		// only need to call out images that come from somewhere *different*.
+		$source_type_counts = array_count_values( array_values( $best_source ) );
+		arsort( $source_type_counts );
+		$dominant_type  = key( $source_type_counts ) ?: '';
+		$dominant_source = $source_labels[ $dominant_type ] ?? ( $dominant_type !== '' ? ucfirst( $dominant_type ) : '' );
+
 		// Cross-reference JetEngine dynamic listings
 		$dynamic_items   = array();
 		$has_jet_listing = false;
@@ -407,6 +420,7 @@ class MediaByPage {
 			'total_size'      => size_format( $total_bytes ),
 			'edit_link'       => get_edit_post_link( $post_id, 'raw' ) ?: '',
 			'has_jet_listing' => $has_jet_listing,
+			'dominant_source' => $dominant_source,
 		) );
 	}
 

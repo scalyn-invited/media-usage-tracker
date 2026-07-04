@@ -148,6 +148,21 @@ class Dashboard {
                 <?php endif; ?>
             </div>
 
+            <!-- Quick Links -->
+            <div class="mut-quick-links">
+                <span class="mut-quick-links-label">Quick Links</span>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details' ) ); ?>" class="mut-quick-link">🗂️ Media Usage</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-media-by-page' ) ); ?>" class="mut-quick-link">📄 Media by Page</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-search' ) ); ?>" class="mut-quick-link">🔍 Search &amp; Filter</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-cleanup' ) ); ?>" class="mut-quick-link">🧹 Cleanup Suggestions</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-bulk-review' ) ); ?>" class="mut-quick-link">🚩 Bulk Review</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-duplicates' ) ); ?>" class="mut-quick-link">🔁 Duplicate Analysis</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-optimize' ) ); ?>" class="mut-quick-link">💾 Storage Optimization</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-quality' ) ); ?>" class="mut-quick-link">✨ Quality Audit</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-trash' ) ); ?>" class="mut-quick-link">🗑️ Trash</a>
+                <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-reports' ) ); ?>" class="mut-quick-link">📈 Reports</a>
+            </div>
+
         </div>
 
         <style>
@@ -255,6 +270,46 @@ class Dashboard {
         .mut-scan-badge-running   { background: #e8f0fd; color: #1b4da3; border: 1px solid #a0bcf0; }
         .mut-scan-badge-pending   { background: #fef9e7; color: #8a6400; border: 1px solid #f0d97a; }
         .mut-no-scan { color: #787c82; font-style: italic; margin: 0; }
+
+        /* ── Quick Links ── */
+        .mut-quick-links {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 16px 20px;
+            margin-top: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .mut-quick-links-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            color: #787c82;
+            margin-right: 4px;
+        }
+        .mut-quick-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            background: #f6f7f7;
+            border: 1px solid #dcdcde;
+            color: #1d2327;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: background 0.15s, border-color 0.15s, color 0.15s;
+        }
+        .mut-quick-link:hover {
+            background: #f0f6fc;
+            border-color: #2271b1;
+            color: #2271b1;
+        }
         </style>
         <?php
     }

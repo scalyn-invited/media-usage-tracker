@@ -153,19 +153,19 @@ class DuplicateAnalysis {
 				💡 <?php echo esc_html( $group['recommendation'] ); ?>
 			</div>
 
-			<div style="overflow-x:auto;">
-			<table class="wp-list-table widefat striped mut-dup-table">
-				<thead>
-					<tr>
-						<th style="width:64px;">Thumb</th>
-						<th>Filename</th>
-						<th style="width:110px;">Status</th>
-						<th style="width:100px;">File Size</th>
-						<th style="width:140px;">Upload Date</th>
-						<th style="width:200px;">Action</th>
+			<div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+			<table class="mut-dup-table w-full block md:table text-sm text-left text-gray-700">
+				<thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+					<tr class="md:table-row">
+						<th class="md:table-cell md:w-[10%] px-4 py-3">Thumb</th>
+						<th class="md:table-cell md:w-[30%] px-4 py-3">Filename</th>
+						<th class="md:table-cell md:w-[16%] px-4 py-3">Status</th>
+						<th class="md:table-cell md:w-[12%] px-4 py-3">File Size</th>
+						<th class="md:table-cell md:w-[16%] px-4 py-3">Upload Date</th>
+						<th class="md:table-cell md:w-[16%] px-4 py-3">Action</th>
 					</tr>
 				</thead>
-				<tbody>
+				<tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
 					<?php foreach ( $group['ids'] as $id ) : ?>
 						<?php $this->render_group_row( $id, $type ); ?>
 					<?php endforeach; ?>
@@ -189,30 +189,37 @@ class DuplicateAnalysis {
 		$uploaded = get_the_date( 'M j, Y', $post );
 
 		$thumb = wp_get_attachment_image( $id, array( 52, 52 ), true, array(
-			'style' => 'width:52px;height:52px;object-fit:cover;border-radius:4px;display:block;',
+			'class' => 'h-10 w-10 rounded object-cover border border-gray-200',
 		) );
 		?>
-		<tr data-id="<?php echo esc_attr( $id ); ?>">
-			<td><?php echo $thumb ?: '<span class="mut-no-thumb"></span>'; ?></td>
-			<td>
-				<strong><?php echo esc_html( $filename ); ?></strong><br>
-				<span class="mut-meta"><?php echo esc_html( $post->post_title ); ?></span>
+		<tr data-id="<?php echo esc_attr( $id ); ?>"
+			class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+			<td class="order-1 md:table-cell md:w-[10%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
+				<?php echo $thumb ?: '<span class="flex h-10 w-10 items-center justify-center rounded bg-gray-100 text-lg">📄</span>'; ?>
 			</td>
-			<td>
+			<td class="order-2 flex-1 min-w-0 md:table-cell md:w-[30%] md:flex-none px-0 md:px-4 py-1 md:py-3 md:align-middle">
+				<strong class="font-medium text-gray-900"><?php echo esc_html( $filename ); ?></strong>
+				<br><span class="text-xs text-gray-500"><?php echo esc_html( $post->post_title ); ?></span>
+			</td>
+			<td class="order-3 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+			<td class="order-4 md:table-cell md:w-[16%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
 				<?php if ( $usage > 0 ) : ?>
-					<a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $id ) ); ?>" style="text-decoration:none;" title="View usage locations">
-						<span class="mut-status-badge mut-status-used">In Use</span>
-					</a>
-					<?php if ( $usage > 1 ) : ?>
-						<br><span class="mut-meta" style="font-size:11px;"><?php echo $usage; ?> locations</span>
-					<?php endif; ?>
+					<span class="inline-block">
+						<a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $id ) ); ?>" class="no-underline" title="View usage locations">
+							<span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-emerald-100 text-emerald-800">In Use</span>
+						</a>
+						<?php if ( $usage > 1 ) : ?>
+							<span class="block text-[11px] text-gray-500"><?php echo $usage; ?> locations</span>
+						<?php endif; ?>
+					</span>
 				<?php else : ?>
-					<span class="mut-status-badge mut-status-unused">Unused</span>
+					<span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Unused</span>
 				<?php endif; ?>
 			</td>
-			<td><?php echo esc_html( $filesize ); ?></td>
-			<td><span class="mut-meta"><?php echo esc_html( $uploaded ); ?></span></td>
-			<td class="mut-dup-row-action">
+			<td class="order-5 md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $filesize ); ?></td>
+			<td class="order-6 md:table-cell md:w-[16%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $uploaded ); ?></td>
+			<td class="order-7 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+			<td class="order-8 mut-dup-row-action md:table-cell md:w-[16%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
 				<?php echo $this->render_row_action( $id, $type, $usage, $status ); // phpcs:ignore ?>
 			</td>
 		</tr>

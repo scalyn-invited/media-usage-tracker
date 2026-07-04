@@ -11,7 +11,7 @@ class Reports {
     public function render() {
         ?>
         <div class="wrap">
-            <h1>Reports &amp; Scan History</h1>
+            <h1>📈 Reports &amp; Scan History</h1>
 
             <h2>Usage Report</h2>
             <?php $this->render_usage_report(); ?>
@@ -42,11 +42,19 @@ class Reports {
             margin: 16px 0 28px;
         }
         .mut-report-card {
+            display: block;
             background: #fff;
             border: 1px solid #c3c4c7;
             border-radius: 8px;
             padding: 20px 24px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            text-decoration: none;
+            color: inherit;
+            transition: box-shadow 0.15s, border-color 0.15s;
+        }
+        .mut-report-card:hover {
+            border-color: #8c8f94;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
         }
         .mut-report-card h3 {
             margin: 0 0 8px;
@@ -105,29 +113,29 @@ class Reports {
 
         <div class="mut-report-grid">
 
-            <div class="mut-report-card total">
+            <a class="mut-report-card total" href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details' ) ); ?>">
                 <h3>Total Media Files</h3>
                 <div class="mut-report-number"><?php echo number_format( $total_media ); ?></div>
                 <p>Attachments in the library</p>
-            </div>
+            </a>
 
-            <div class="mut-report-card active">
+            <a class="mut-report-card active" href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details#used' ) ); ?>">
                 <h3>Active Files</h3>
                 <div class="mut-report-number"><?php echo number_format( $active_files ); ?></div>
                 <p>Referenced in posts or pages</p>
-            </div>
+            </a>
 
-            <div class="mut-report-card unused">
+            <a class="mut-report-card unused" href="<?php echo esc_url( admin_url( 'admin.php?page=mut-usage-details#unused' ) ); ?>">
                 <h3>Unused Files</h3>
                 <div class="mut-report-number"><?php echo number_format( $unused_files ); ?></div>
                 <p>Not found in any content</p>
-            </div>
+            </a>
 
-            <div class="mut-report-card storage">
+            <a class="mut-report-card storage" href="<?php echo esc_url( admin_url( 'admin.php?page=mut-cleanup' ) ); ?>">
                 <h3>Storage Usage</h3>
                 <div class="mut-report-number"><?php echo esc_html( $this->format_bytes( $total_storage ) ); ?></div>
                 <p><?php echo esc_html( $this->format_bytes( $unused_storage ) ); ?> used by unused files</p>
-            </div>
+            </a>
 
         </div>
         <?php
@@ -157,31 +165,58 @@ class Reports {
         }
 
         ?>
-        <div style="overflow-x:auto;">
-        <table class="wp-list-table widefat striped">
-            <thead>
-                <tr>
-                    <th>Date</th>
-                    <th>Status</th>
-                    <th>Total Media</th>
-                    <th>In Use</th>
-                    <th>Unused</th>
+        <div class="md:overflow-hidden md:rounded-lg md:border md:border-gray-200 md:bg-white md:shadow-sm">
+        <table class="w-full block md:table text-sm text-left text-gray-700">
+            <thead class="max-md:hidden md:table-header-group bg-gray-50 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <tr class="md:table-row">
+                    <th class="md:table-cell w-56 px-4 py-3">Date</th>
+                    <th class="md:table-cell w-28 px-4 py-3">Status</th>
+                    <th class="md:table-cell w-28 px-4 py-3">Total Media</th>
+                    <th class="md:table-cell w-24 px-4 py-3">In Use</th>
+                    <th class="md:table-cell w-24 px-4 py-3">Unused</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                 <?php foreach ($history as $scan) : ?>
-                    <tr>
-                        <td><?php echo esc_html( ( new \DateTime( $scan->started_at, wp_timezone() ) )->format( 'Y-m-d H:i:s' ) ); ?></td>
-                        <td><span class="status-<?php echo esc_attr($scan->status); ?>"><?php echo esc_html($scan->status); ?></span></td>
-                        <td><?php echo esc_html($scan->total_attachments); ?></td>
-                        <td><?php echo esc_html($scan->files_in_use); ?></td>
-                        <td><?php echo esc_html($scan->unused_files); ?></td>
+                    <tr class="flex flex-wrap items-center gap-x-3 gap-y-1 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
+                        <td class="order-1 md:table-cell md:w-56 px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                            <?php echo esc_html( ( new \DateTime( $scan->started_at, wp_timezone() ) )->format( 'Y-m-d H:i:s' ) ); ?>
+                        </td>
+                        <td class="order-2 ml-auto md:ml-0 md:table-cell w-28 px-0 md:px-4 py-1 md:py-3 md:align-middle">
+                            <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide <?php echo esc_attr( $this->status_badge_classes( $scan->status ) ); ?>"><?php echo esc_html($scan->status); ?></span>
+                        </td>
+                        <td class="order-3 basis-full w-0 h-0 p-0 md:hidden" aria-hidden="true"></td>
+                        <td class="order-4 md:table-cell w-28 px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500">
+                            <span class="md:hidden text-gray-400">Total </span><?php echo esc_html($scan->total_attachments); ?>
+                        </td>
+                        <td class="order-5 md:table-cell w-24 px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
+                            <span class="md:hidden text-gray-400">In use </span><?php echo esc_html($scan->files_in_use); ?>
+                        </td>
+                        <td class="order-6 md:table-cell w-24 px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
+                            <span class="md:hidden text-gray-400">Unused </span><?php echo esc_html($scan->unused_files); ?>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
         </div>
         <?php
+    }
+
+    /**
+     * Map a scan's free-text status to Tailwind badge color classes.
+     * Unknown/legacy status strings fall back to a neutral gray badge.
+     */
+    private function status_badge_classes( $status ) {
+        $map = array(
+            'completed' => 'bg-emerald-100 text-emerald-800',
+            'success'   => 'bg-emerald-100 text-emerald-800',
+            'running'   => 'bg-blue-100 text-blue-800',
+            'partial'   => 'bg-amber-100 text-amber-800',
+            'failed'    => 'bg-red-100 text-red-800',
+            'error'     => 'bg-red-100 text-red-800',
+        );
+        return $map[ strtolower( (string) $status ) ] ?? 'bg-gray-200 text-gray-600';
     }
 
     public function handle_csv_export() {
