@@ -124,28 +124,58 @@ versus after a page reload.
 
 The scanner (`includes/class-scanner.php`) runs over `post`, `page`, and all
 public custom post types, across `publish`, `draft`, `private`, and `future`
-statuses.
+statuses. Each detector is a self-contained class implementing
+`MediaDetector`, registered in `Scanner::load_detectors()` and also
+extensible by other plugins via the `mut_media_detectors` filter. Every
+detector **self-gates** via its own `is_available()` — it only runs when the
+theme/plugin it targets is actually active, so an install with none of these
+active still gets identical results to previously (content + featured image
+only).
 
-### Scanned (in use)
+### Core detectors (always run)
 
-- **`post_content`** — read per post and analysed by two methods:
+- **`post_content`** (`class-content-detector.php`) — analysed by several
+  methods:
   - **ID-pattern matching** — regex for `wp-image-(\d+)`, `attachment_id=…`,
     `"id":(\d+)`, `data-id="…"` (covers common Gutenberg image markup)
   - **URL-based detection** — regex matches media URLs
     (`.jpg/.jpeg/.png/.gif/.webp/.pdf/.mp4`) and resolves them to attachment IDs
     by `guid` / `post_name` / `post_title`. This is the most reliable method.
-- **Featured Images** — `get_post_thumbnail_id()`, recorded with
-  `usage_type = 'featured_image'`
-- **Gutenberg Blocks** — caught **indirectly** via the ID-pattern and URL regex
-  above. Note: this is regex over raw markup, **not** `parse_blocks()` block
-  parsing.
+  - **CSS `url()` scanning** — inline styles / custom CSS blocks in the content
+  - **Gallery shortcode & block** — `[gallery ids="…"]` / `[gallery
+    include="…"]` shortcode attributes, and the Gutenberg `wp:gallery` block's
+    inner `"id":N` list, both parsed directly (recorded as `usage_type =
+    'gallery'`) — not just caught incidentally by the regexes above
+  - **Video poster** — `[video poster="url"]` shortcode and the Gutenberg
+    `wp:video` block's `"poster":"url"`, resolved via
+    `attachment_url_to_postid()` (recorded as `usage_type = 'video_poster'`)
+- **Featured Images** (`class-featured-image-detector.php`) —
+  `get_post_thumbnail_id()`, recorded with `usage_type = 'featured_image'`
 
-### Future Enhancements (not yet implemented)
+### Page builder / plugin detectors (self-gated, run only when active)
 
-- **Elementor Content** — no `_elementor_data` postmeta handling yet
-- **Custom Fields** — no `get_post_meta()` scanning yet
-- **Gallery shortcode/block** — detected but handling is a stub
-  (`// TODO` in `scan_post_content()`)
+| Detector | Targets | Runs when |
+|---|---|---|
+| `class-elementor-detector.php` | `_elementor_data` postmeta, walked as a JSON tree — recognizes any node with a numeric `id` + `url`/`source` (covers Image/Gallery/Carousel/Background controls) plus a CSS `url()` sweep over widget `custom_css` | `ELEMENTOR_VERSION` defined |
+| `class-acf-detector.php` | ACF fields on posts and terms, via ACF's own `get_field_objects()` | `get_field_objects()` exists |
+| `class-divi-detector.php` | Divi Builder, both of its storage formats | `ET_BUILDER_VERSION` defined |
+| `class-wpbakery-detector.php` | `[vc_*]` shortcodes in `post_content` | WPBakery/VC constants or `vc_map()` |
+| `class-beaver-builder-detector.php` | `_fl_builder_data` postmeta | `FLBuilder` class or `FL_BUILDER_VERSION` |
+| `class-avada-detector.php` | Avada / Fusion Builder (three storage locations) | Fusion Builder class/constants |
+| `class-astra-detector.php` | Astra theme customizer settings (`theme_mods_astra`) | Astra theme active |
+| `class-woocommerce-detector.php` | Product gallery, thumbnail, and related WooCommerce media | `WooCommerce` class or `WC()` |
+| `class-yoast-detector.php` | Yoast's social/OG image attachment IDs in postmeta | `WPSEO_VERSION` defined |
+| `class-gravity-forms-detector.php` | Image references across all Gravity Forms forms | `GFAPI` class or `gravity_form()` |
+| `class-jetengine-detector.php` | JetEngine field values in postmeta | `Jet_Engine` class active |
+| `class-jetpopup-detector.php` | JetPopup's two distinct media sources | `Jet_Popup` class active |
+| `class-wpdatatables-detector.php` | wpDataTables table/column metadata | `wdt_get_all_tables()` exists |
+
+### Known gap
+
+There's no *generic* postmeta sweep — a theme or plugin that stores an
+attachment ID under its own arbitrary meta key (not ACF, not one of the
+page builders above) won't be picked up. Only the specific sources listed
+above are scanned.
 
 ### Known limitation
 
@@ -170,7 +200,7 @@ The granular record: every place a media file is referenced becomes a row.
 | `attachment_id` | bigint, indexed | The media file referenced                        |
 | `post_id`       | bigint, indexed | The post/page/CPT containing the reference       |
 | `post_type`     | varchar(20)     | Type of the referencing post                     |
-| `usage_type`    | varchar(50)     | `content` or `featured_image`                    |
+| `usage_type`    | varchar(50)     | Detector key that recorded the reference — `content`, `featured_image`, `gallery`, `video_poster`, or one of the page-builder/plugin keys in **Data Collection Sources** (`elementor`, `acf`, `divi`, `wpbakery`, `beaver_builder`, `avada`, `astra`, `woocommerce`, `yoast`, `gravityforms`, `jetengine`, `jetpopup`, `wpdatatables`) |
 | `context`       | text            | ~200-char excerpt of where the reference appears |
 | `scan_id`       | bigint, indexed | Links the row to a scan run                      |
 | `created_at`    | datetime        | When the reference was recorded                  |

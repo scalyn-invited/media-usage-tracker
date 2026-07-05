@@ -26,6 +26,8 @@ class MediaByPage {
 			 ORDER BY media_count DESC"
 		);
 
+		$front_page_id = ( get_option( 'show_on_front' ) === 'page' ) ? (int) get_option( 'page_on_front' ) : 0;
+
 		$filtered = array();
 		foreach ( $rows as $row ) {
 			$post = get_post( $row->post_id );
@@ -38,6 +40,7 @@ class MediaByPage {
 			$row->modified  = get_the_modified_date( 'M j, Y', $row->post_id );
 			$row->post_type_label = 'Page';
 			$row->status    = $post->post_status;
+			$row->is_front_page = ( $front_page_id > 0 && (int) $row->post_id === $front_page_id );
 
 			if ( $search !== '' && stripos( $row->title, $search ) === false ) {
 				continue;
@@ -71,6 +74,9 @@ class MediaByPage {
 							<div class="mut-mbp-row-title">
 								<?php echo esc_html( $row->title ); ?>
 								<span class="mut-mbp-row-type"><?php echo esc_html( $row->post_type_label ); ?></span>
+								<?php if ( $row->is_front_page ) : ?>
+									<span class="mut-mbp-status-badge mut-mbp-status-front">Front Page</span>
+								<?php endif; ?>
 								<?php if ( $row->status !== 'publish' ) : ?>
 									<span class="mut-mbp-status-badge mut-mbp-status-<?php echo esc_attr( $row->status ); ?>"><?php echo esc_html( ucfirst( $row->status ) ); ?></span>
 								<?php endif; ?>
@@ -158,6 +164,17 @@ class MediaByPage {
 			font-size: 10px; color: #2271b1; background: #e6f1fb;
 			padding: 1px 6px; border-radius: 4px; display: inline-block; margin-top: 3px;
 		}
+		.mut-mbp-group-header {
+			display: flex; align-items: center; justify-content: space-between; gap: 8px;
+			margin: 16px 0 8px; padding-bottom: 6px; border-bottom: 1px solid #e0e0e0;
+			font-size: 12px; font-weight: 600; color: #3c434a;
+			text-transform: uppercase; letter-spacing: .03em;
+		}
+		.mut-mbp-group-header:first-child { margin-top: 0; }
+		.mut-mbp-group-count {
+			font-weight: 400; text-transform: none; letter-spacing: normal;
+			color: #787c82; font-size: 11px;
+		}
 		.mut-mbp-detail-footer {
 			display: flex; gap: 20px; font-size: 13px; color: #787c82;
 			padding-top: 12px; border-top: 1px solid #f0f0f0; flex-wrap: wrap;
@@ -172,6 +189,7 @@ class MediaByPage {
 		.mut-mbp-status-pending { background: #e8f0fd; color: #1b4da3; }
 		.mut-mbp-status-private { background: #f0e8f6; color: #4527a0; }
 		.mut-mbp-status-trash { background: #fde8e8; color: #a32d2d; }
+		.mut-mbp-status-front { background: #d7f5e0; color: #1a7a3a; }
 		.mut-mbp-jet-notice {
 			background: #fef8ee; border: 1px solid #f0d97a; border-radius: 6px;
 			padding: 10px 14px; font-size: 13px; color: #6e5300; margin-bottom: 14px;
@@ -210,21 +228,52 @@ class MediaByPage {
 
 				var items = res.data.items;
 				var dominantSource = res.data.dominant_source || '';
-				var html  = '<div class="mut-mbp-grid">';
+
+				// Bucket items by their group label (e.g. "Image Carousel
+				// widget"), preserving first-seen order.
+				var groupOrder = [];
+				var groupMap   = {};
 				for (var i = 0; i < items.length; i++) {
 					var it = items[i];
-					html += '<div class="mut-mbp-thumb" onclick="mutMbpLightbox(\'' + it.full.replace(/'/g, "\\'") + '\', \'' + it.filename.replace(/'/g, "\\'") + '\')" style="cursor:pointer;" title="Click to preview">';
-					html += '<img src="' + it.thumb + '" alt="" loading="lazy">';
-					html += '<div class="mut-mbp-thumb-info">';
-					html += '<div class="mut-mbp-thumb-name" title="' + it.filename + '">' + it.filename + '</div>';
+					var g  = it.group || it.source || 'Other';
+					if (!groupMap[g]) {
+						groupMap[g] = [];
+						groupOrder.push(g);
+					}
+					groupMap[g].push(it);
+				}
+
+				function renderThumb(it) {
+					var out = '<div class="mut-mbp-thumb" onclick="mutMbpLightbox(\'' + it.full.replace(/'/g, "\\'") + '\', \'' + it.filename.replace(/'/g, "\\'") + '\')" style="cursor:pointer;" title="Click to preview">';
+					out += '<img src="' + it.thumb + '" alt="" loading="lazy">';
+					out += '<div class="mut-mbp-thumb-info">';
+					out += '<div class="mut-mbp-thumb-name" title="' + it.filename + '">' + it.filename + '</div>';
 					// Only call out the source when it differs from the page's
 					// dominant one (already shown once in the row header).
 					if (it.source !== dominantSource) {
-						html += '<span class="mut-mbp-thumb-source">' + it.source + '</span>';
+						out += '<span class="mut-mbp-thumb-source">' + it.source + '</span>';
 					}
-					html += '</div></div>';
+					out += '</div></div>';
+					return out;
 				}
-				html += '</div>';
+
+				var html = '';
+				// A single group reads the same as before (no extra heading
+				// noise for a page that's just one kind of content).
+				var showGroupHeadings = groupOrder.length > 1;
+				for (var gi = 0; gi < groupOrder.length; gi++) {
+					var groupName  = groupOrder[gi];
+					var groupItems = groupMap[groupName];
+					if (showGroupHeadings) {
+						html += '<div class="mut-mbp-group-header"><span>' + groupName + '</span>';
+						html += '<span class="mut-mbp-group-count">' + groupItems.length + ' image' + (groupItems.length !== 1 ? 's' : '') + '</span></div>';
+					}
+					html += '<div class="mut-mbp-grid">';
+					for (var j = 0; j < groupItems.length; j++) {
+						html += renderThumb(groupItems[j]);
+					}
+					html += '</div>';
+				}
 				var dynItems = res.data.dynamic_items || [];
 				if (dynItems.length > 0) {
 					html += '<div class="mut-mbp-dynamic-section">';
@@ -321,7 +370,7 @@ class MediaByPage {
 		$table = $wpdb->prefix . 'mut_media_usage';
 
 		$usages = $wpdb->get_results( $wpdb->prepare(
-			"SELECT DISTINCT attachment_id, usage_type FROM {$table} WHERE post_id = %d",
+			"SELECT attachment_id, usage_type, context FROM {$table} WHERE post_id = %d",
 			$post_id
 		) );
 
@@ -347,12 +396,15 @@ class MediaByPage {
 		$generic_sources = array( 'content', 'gallery', 'featured_image' );
 
 		// Build best source per attachment: prefer specific detectors over generic.
+		// Carries the recorded `context` along too — for Elementor that's now
+		// the owning widget's label (e.g. "Image Carousel widget"), which is
+		// what we group thumbnails by below.
 		$best_source = array();
 		foreach ( $usages as $u ) {
-			$aid = (int) $u->attachment_id;
+			$aid  = (int) $u->attachment_id;
 			$type = $u->usage_type;
-			if ( ! isset( $best_source[ $aid ] ) || in_array( $best_source[ $aid ], $generic_sources, true ) ) {
-				$best_source[ $aid ] = $type;
+			if ( ! isset( $best_source[ $aid ] ) || in_array( $best_source[ $aid ]['type'], $generic_sources, true ) ) {
+				$best_source[ $aid ] = array( 'type' => $type, 'context' => $u->context );
 			}
 		}
 
@@ -360,11 +412,14 @@ class MediaByPage {
 		$total_bytes = 0;
 		$seen       = array();
 
-		foreach ( $best_source as $aid => $source_type ) {
+		foreach ( $best_source as $aid => $info ) {
 			if ( isset( $seen[ $aid ] ) ) {
 				continue;
 			}
 			$seen[ $aid ] = true;
+
+			$source_type = $info['type'];
+			$context     = $info['context'];
 
 			$file  = get_attached_file( $aid );
 			$thumb = wp_get_attachment_image_url( $aid, 'thumbnail' );
@@ -380,12 +435,22 @@ class MediaByPage {
 
 			$full_url = wp_get_attachment_url( $aid ) ?: $thumb;
 
+			$source_label = $source_labels[ $source_type ] ?? ucfirst( $source_type );
+
+			// Group thumbnails by the Elementor widget they live in (e.g.
+			// "Image Carousel widget") when we have one; everything else
+			// (ACF, plain WordPress content, etc.) groups by its source.
+			$group = ( $source_type === 'elementor' && ! empty( $context ) && $context !== 'Elementor' )
+				? $context
+				: $source_label;
+
 			$items[] = array(
 				'id'       => $aid,
 				'filename' => basename( $file ?: get_the_title( $aid ) ),
 				'thumb'    => $thumb,
 				'full'     => $full_url,
-				'source'   => $source_labels[ $source_type ] ?? ucfirst( $source_type ),
+				'source'   => $source_label,
+				'group'    => $group,
 				'size'     => size_format( $bytes ),
 			);
 		}
@@ -395,7 +460,7 @@ class MediaByPage {
 		// The page's dominant source (e.g. "Elementor" for an Elementor-built
 		// page) is already shown once in the row header, so per-image badges
 		// only need to call out images that come from somewhere *different*.
-		$source_type_counts = array_count_values( array_values( $best_source ) );
+		$source_type_counts = array_count_values( wp_list_pluck( $best_source, 'type' ) );
 		arsort( $source_type_counts );
 		$dominant_type  = key( $source_type_counts ) ?: '';
 		$dominant_source = $source_labels[ $dominant_type ] ?? ( $dominant_type !== '' ? ucfirst( $dominant_type ) : '' );

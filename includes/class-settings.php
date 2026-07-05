@@ -269,15 +269,16 @@ class Settings {
 				<tr>
 					<th scope="row"><?php esc_html_e( 'Current Version', 'media-usage-tracker' ); ?></th>
 					<td>
-						<?php echo esc_html( MUT_VERSION ); ?>
-						&nbsp;&mdash;&nbsp;
-						<form method="post" style="display:inline;">
-							<?php wp_nonce_field( 'mut_check_update_action', 'mut_check_update_nonce' ); ?>
-							<button type="submit" name="mut_check_update" class="button button-secondary">
-								<?php esc_html_e( 'Check for Updates', 'media-usage-tracker' ); ?>
-							</button>
-						</form>
-						<p class="description"><?php esc_html_e( 'Checks the GitHub repository for a newer release.', 'media-usage-tracker' ); ?></p>
+						<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+							<span><?php echo esc_html( MUT_VERSION ); ?></span>
+							<form method="post" style="display:inline;margin:0;">
+								<?php wp_nonce_field( 'mut_check_update_action', 'mut_check_update_nonce' ); ?>
+								<button type="submit" name="mut_check_update" class="button button-secondary">
+									<?php esc_html_e( 'Check for Updates', 'media-usage-tracker' ); ?>
+								</button>
+							</form>
+						</div>
+						<p class="description" style="margin-top:8px;"><?php esc_html_e( 'Checks the GitHub repository for a newer release.', 'media-usage-tracker' ); ?></p>
 					</td>
 				</tr>
 			</table>

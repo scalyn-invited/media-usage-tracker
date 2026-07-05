@@ -77,10 +77,8 @@ class QualityAudit {
 							continue;
 						}
 						?>
-						<div class="mut-quality-card mut-sev-<?php echo esc_attr( $check['severity'] ); ?>">
-							<?php
-							$detail_url = admin_url( 'admin.php?page=mut-quality-detail&check=' . urlencode( $check['key'] ) );
-							?>
+						<?php $detail_url = admin_url( 'admin.php?page=mut-quality-detail&check=' . urlencode( $check['key'] ) ); ?>
+						<div class="mut-quality-card mut-quality-card--clickable mut-sev-<?php echo esc_attr( $check['severity'] ); ?>" data-href="<?php echo esc_url( $detail_url ); ?>" tabindex="0" role="link">
 							<div class="mut-quality-card-head">
 								<span class="mut-sev-badge mut-sev-badge-<?php echo esc_attr( $check['severity'] ); ?>">
 									<?php echo esc_html( ucfirst( $check['severity'] ) ); ?>
@@ -151,6 +149,35 @@ class QualityAudit {
 
 			<?php endif; ?>
 		</div>
+
+		<script>
+		(function ($) {
+			// Whole card navigates to its detail page, except clicks that land
+			// on one of the card's own links/buttons (thumbnails, count,
+			// "+N more", AI generate button) — those keep their own destination.
+			$(document).on('click', '.mut-quality-card--clickable', function (e) {
+				if ($(e.target).closest('a, button, input').length) {
+					return;
+				}
+				var href = $(this).data('href');
+				if (href) {
+					window.location.href = href;
+				}
+			});
+			$(document).on('keydown', '.mut-quality-card--clickable', function (e) {
+				if (e.key === 'Enter' || e.key === ' ') {
+					if ($(e.target).closest('a, button, input').length) {
+						return;
+					}
+					e.preventDefault();
+					var href = $(this).data('href');
+					if (href) {
+						window.location.href = href;
+					}
+				}
+			});
+		})(jQuery);
+		</script>
 		<?php
 	}
 }

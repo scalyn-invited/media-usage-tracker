@@ -878,6 +878,15 @@ a.mut-cs-pill:hover {
 	padding: 16px; border-left-width: 4px;
 	display: flex; flex-direction: column;
 }
+.mut-quality-card--clickable {
+	cursor: pointer;
+	transition: box-shadow 0.15s, border-color 0.15s;
+}
+.mut-quality-card--clickable:hover,
+.mut-quality-card--clickable:focus-visible {
+	box-shadow: 0 4px 14px rgba(0,0,0,0.1);
+	border-color: #8c8f94;
+}
 .mut-quality-card.mut-sev-high   { border-left-color: #d63638; }
 .mut-quality-card.mut-sev-medium { border-left-color: #dba617; }
 .mut-quality-card.mut-sev-low    { border-left-color: #72aee6; }
