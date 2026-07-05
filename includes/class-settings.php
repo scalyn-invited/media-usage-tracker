@@ -8,6 +8,29 @@ use MediaUsageTracker\Admin\AltTextGenerator;
 class Settings {
 
 	public function render() {
+		// Handle manual "Check for Updates" click (separate from the settings form/nonce).
+		if ( isset( $_POST['mut_check_update'] ) && check_admin_referer( 'mut_check_update_action', 'mut_check_update_nonce' ) ) {
+			delete_site_transient( 'update_plugins' );
+			wp_update_plugins();
+			echo '<div class="notice notice-info is-dismissible"><p>' . esc_html__( 'Checked GitHub for updates.', 'media-usage-tracker' ) . ' ';
+
+			$plugin_file    = plugin_basename( MUT_PLUGIN_FILE );
+			$update_plugins = get_site_transient( 'update_plugins' );
+
+			if ( isset( $update_plugins->response[ $plugin_file ] ) ) {
+				$new_version = $update_plugins->response[ $plugin_file ]->new_version;
+				printf(
+					/* translators: %s = new version number */
+					esc_html__( 'A new version (%s) is available — go to the Plugins page to update.', 'media-usage-tracker' ),
+					esc_html( $new_version )
+				);
+			} else {
+				esc_html_e( 'You already have the latest version.', 'media-usage-tracker' );
+			}
+
+			echo '</p></div>';
+		}
+
 		$enabled   = (bool) get_option( Scheduler::OPT_ON, false );
 		$frequency = get_option( Scheduler::OPT_FREQ, 'weekly' );
 		$next_run  = Scheduler::next_run();
@@ -240,6 +263,24 @@ class Settings {
 
 				<?php submit_button(); ?>
 			</form>
+
+			<h2><?php esc_html_e( 'Plugin Updates', 'media-usage-tracker' ); ?></h2>
+			<table class="form-table" role="presentation">
+				<tr>
+					<th scope="row"><?php esc_html_e( 'Current Version', 'media-usage-tracker' ); ?></th>
+					<td>
+						<?php echo esc_html( MUT_VERSION ); ?>
+						&nbsp;&mdash;&nbsp;
+						<form method="post" style="display:inline;">
+							<?php wp_nonce_field( 'mut_check_update_action', 'mut_check_update_nonce' ); ?>
+							<button type="submit" name="mut_check_update" class="button button-secondary">
+								<?php esc_html_e( 'Check for Updates', 'media-usage-tracker' ); ?>
+							</button>
+						</form>
+						<p class="description"><?php esc_html_e( 'Checks the GitHub repository for a newer release.', 'media-usage-tracker' ); ?></p>
+					</td>
+				</tr>
+			</table>
 		</div>
 
 		<script>
