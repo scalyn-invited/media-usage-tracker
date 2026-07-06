@@ -18,6 +18,7 @@ use MediaUsageTracker\Admin\TrashBin;
 use MediaUsageTracker\Core\Scheduler;
 use MediaUsageTracker\Core\SafeDelete;
 use MediaUsageTracker\Core\Notifier;
+use MediaUsageTracker\Core\RealtimeScanner;
 
 class Plugin {
 
@@ -43,6 +44,7 @@ class Plugin {
         require_once MUT_PLUGIN_DIR . 'includes/class-quality-audit.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-quality-detail.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-scheduler.php';
+        require_once MUT_PLUGIN_DIR . 'includes/class-realtime-scanner.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-safe-delete.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-trash-bin.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-media-by-page.php';
@@ -61,6 +63,10 @@ class Plugin {
         // Register the monthly cron interval and the scheduled scan hook.
         add_filter( 'cron_schedules', array( 'MediaUsageTracker\Core\Scheduler', 'add_cron_intervals' ) );
         Scheduler::register();
+
+        // Keep media usage current automatically as content changes, instead
+        // of waiting for the next manual/scheduled scan.
+        RealtimeScanner::register();
 
         // Email summary after a scheduled scan completes (runs during cron too).
         Notifier::register( $this->storage );

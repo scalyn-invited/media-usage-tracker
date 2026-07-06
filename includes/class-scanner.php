@@ -5,6 +5,15 @@ use MediaUsageTracker\Storage\UsageStorage;
 
 class MediaScanner {
 
+    /**
+     * Fixed scan_id tag used for all incremental (real-time) rescans, so
+     * they never collide with — or clutter — the auto-incrementing IDs a
+     * real full scan uses in mut_scan_history. 0 is never issued to a real
+     * scan (scan IDs auto-increment from 1), so it's a safe permanent
+     * sentinel that just means "kept up to date incrementally".
+     */
+    const INCREMENTAL_SCAN_ID = 0;
+
     private $storage;
     private $batch_size = 20; // Process in batches to avoid timeouts
 
@@ -76,6 +85,53 @@ class MediaScanner {
      */
     public function get_detectors() {
         return $this->detectors;
+    }
+
+    /**
+     * Re-detect a single post across every per-post detector — used by the
+     * real-time scanner right after that post is saved/updated, instead of
+     * waiting for the next full scan. Clears the post's existing rows first
+     * so an edit that *removes* a media reference is reflected too, not
+     * just additions.
+     *
+     * @param int $post_id
+     * @return int Number of usage rows recorded.
+     */
+    public function rescan_post( $post_id ) {
+        $post = get_post( $post_id );
+        if ( ! $post ) {
+            return 0;
+        }
+
+        $this->storage->clear_usage_for_post( $post_id );
+
+        $recorded = 0;
+        foreach ( $this->detectors as $detector ) {
+            if ( $detector->is_available() ) {
+                $recorded += (int) $detector->detect( $post, self::INCREMENTAL_SCAN_ID );
+            }
+        }
+
+        return $recorded;
+    }
+
+    /**
+     * Re-run one global (non-post) detector's scan_all() by its key — e.g.
+     * 'gravityforms'. Used by the real-time scanner right after a form is
+     * saved or deleted. Clears that detector's existing rows first, same
+     * reasoning as rescan_post().
+     *
+     * @param string $key
+     * @return int Number of usage rows recorded.
+     */
+    public function rescan_global_detector( $key ) {
+        foreach ( $this->detectors as $detector ) {
+            if ( $detector->key() === $key && method_exists( $detector, 'scan_all' ) && $detector->is_available() ) {
+                $this->storage->clear_usage_for_post_type( $key );
+                return (int) $detector->scan_all( self::INCREMENTAL_SCAN_ID );
+            }
+        }
+        return 0;
     }
 
     /**

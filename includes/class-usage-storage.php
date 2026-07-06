@@ -249,6 +249,40 @@ class UsageStorage {
     }
 
     /**
+     * Clear every usage row recorded against one specific post. Used by the
+     * incremental (real-time) scanner before re-detecting that single post,
+     * and when a post is deleted (so its media stops being falsely counted
+     * as "in use"). Scoped to a single post_id, so — unlike the old scan_id-
+     * scoped clearing this plugin used to do — there's no risk of leaving
+     * stale rows around or wiping unrelated posts' data.
+     */
+    public function clear_usage_for_post( $post_id ) {
+        global $wpdb;
+        $wpdb->delete( $this->usage_table, array( 'post_id' => absint( $post_id ) ), array( '%d' ) );
+    }
+
+    /**
+     * Clear every usage row recorded under one synthetic post_type (e.g.
+     * 'gravityforms', 'wpdatatables') — the detectors that aren't tied to a
+     * real wp_posts row. Used before re-running that one detector's
+     * scan_all() so re-detection doesn't accumulate duplicate rows.
+     */
+    public function clear_usage_for_post_type( $post_type ) {
+        global $wpdb;
+        $wpdb->delete( $this->usage_table, array( 'post_type' => sanitize_key( $post_type ) ), array( '%s' ) );
+    }
+
+    /**
+     * Clear every usage row referencing one attachment. Used when that media
+     * file is deleted from the library, so it doesn't linger as a phantom
+     * "used" reference pointing at nothing.
+     */
+    public function clear_usage_for_attachment( $attachment_id ) {
+        global $wpdb;
+        $wpdb->delete( $this->usage_table, array( 'attachment_id' => absint( $attachment_id ) ), array( '%d' ) );
+    }
+
+    /**
      * Get the distinct post statuses of every post that references an attachment.
      * Used by the AI Cleanup Advisor to tell "live on the site" apart from
      * "only linked in drafts". Returns e.g. array( 'publish', 'draft' ).

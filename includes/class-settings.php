@@ -3,6 +3,7 @@ namespace MediaUsageTracker\Admin;
 
 use MediaUsageTracker\Core\Scheduler;
 use MediaUsageTracker\Core\Notifier;
+use MediaUsageTracker\Core\RealtimeScanner;
 use MediaUsageTracker\Admin\AltTextGenerator;
 
 class Settings {
@@ -124,6 +125,21 @@ class Settings {
 									?>
 								</p>
 							<?php endif; ?>
+						</td>
+					</tr>
+				</table>
+
+				<h2><?php esc_html_e( 'Instant Updates', 'media-usage-tracker' ); ?></h2>
+				<p class="description"><?php esc_html_e( 'Keep media usage current automatically as you edit — no need to re-run a scan after every change. Covers regular pages/posts (including Elementor, ACF, Divi, WPBakery, Beaver Builder, and similar builders) and Gravity Forms. Changes are grouped and processed a few seconds later in the background, so this never affects visitors browsing the site.', 'media-usage-tracker' ); ?></p>
+
+				<table class="form-table" role="presentation">
+					<tr>
+						<th scope="row"><?php esc_html_e( 'Enable Instant Updates', 'media-usage-tracker' ); ?></th>
+						<td>
+							<label>
+								<input type="checkbox" name="<?php echo esc_attr( RealtimeScanner::OPT_ON ); ?>" value="1" <?php checked( RealtimeScanner::is_enabled() ); ?> />
+								<?php esc_html_e( 'Rescan a page/form automatically right after it\'s saved or deleted', 'media-usage-tracker' ); ?>
+							</label>
 						</td>
 					</tr>
 				</table>
@@ -338,6 +354,7 @@ class Settings {
 	public function register_settings() {
 		register_setting( 'mut_settings', Scheduler::OPT_ON,   array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'mut_settings', Scheduler::OPT_FREQ, array( 'sanitize_callback' => 'sanitize_key' ) );
+		register_setting( 'mut_settings', RealtimeScanner::OPT_ON, array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'mut_settings', Notifier::OPT_ON,         array( 'sanitize_callback' => 'absint' ) );
 		register_setting( 'mut_settings', Notifier::OPT_TO,         array( 'sanitize_callback' => 'sanitize_email' ) );
 		register_setting( 'mut_settings', AltTextGenerator::OPT_PROVIDER,     array( 'sanitize_callback' => 'sanitize_key' ) );

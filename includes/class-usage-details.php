@@ -466,10 +466,10 @@ class UsageDetails {
                     <tbody class="block md:table-row-group md:divide-y md:divide-gray-100">
                         <?php
                         foreach ( $usages as $usage ) :
-                            $post        = get_post( $usage->post_id );
-                            $title       = $post ? $post->post_title : '(Deleted)';
-                            $post_status = $post ? $post->post_status : '';
-                            $edit_link   = get_edit_post_link( $usage->post_id );
+                            $loc         = $this->resolve_usage_location( $usage );
+                            $title       = $loc['title'];
+                            $post_status = $loc['post_status'];
+                            $edit_link   = $loc['edit_link'];
 
                             // Status labels to show next to title (skip 'publish' — that's the default)
                             $status_labels = array(
@@ -495,7 +495,7 @@ class UsageDetails {
                                     <?php endif; ?>
                                 </td>
                                 <td class="block md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500">
-                                    <span class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Content Type: </span><?php echo esc_html( ucfirst( $usage->post_type ) ); ?>
+                                    <span class="text-[11px] font-semibold uppercase tracking-wide text-gray-400 md:hidden">Content Type: </span><?php echo esc_html( $this->content_type_label( $usage->post_type ) ); ?>
                                 </td>
                                 <td class="block md:table-cell md:w-[18%] px-0 md:px-4 py-1 md:py-3 md:align-middle">
                                     <span class="inline-block rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-gray-600">
@@ -575,6 +575,62 @@ class UsageDetails {
         }
 
         return array_values( array_column( $best, 'row' ) );
+    }
+
+    /**
+     * Resolve a usage row's title/edit-link/status.
+     *
+     * Most detectors record `post_id` as a genuine wp_posts ID, so a plain
+     * get_post() lookup works. A couple of detectors (Gravity Forms,
+     * wpDataTables) intentionally store *their own* entity ID there instead —
+     * forms and tables aren't wp_posts rows at all — so get_post() always
+     * returns nothing for them and the row was showing a false "(Deleted)"
+     * even when the form/table is very much alive. Route those two through
+     * their own lookup instead.
+     */
+    private function resolve_usage_location( $usage ) {
+        if ( $usage->post_type === 'gravityforms' ) {
+            $title     = '(Deleted)';
+            $edit_link = '';
+            if ( class_exists( '\GFAPI' ) ) {
+                $form = \GFAPI::get_form( $usage->post_id );
+                if ( $form ) {
+                    $title     = $form['title'];
+                    $edit_link = admin_url( 'admin.php?page=gf_edit_forms&id=' . absint( $usage->post_id ) );
+                }
+            }
+            return array( 'title' => $title, 'edit_link' => $edit_link, 'post_status' => '' );
+        }
+
+        if ( $usage->post_type === 'wpdatatables' ) {
+            global $wpdb;
+            $title     = '(Deleted)';
+            $edit_link = '';
+            $row = $wpdb->get_row( $wpdb->prepare(
+                "SELECT title FROM {$wpdb->prefix}wpdatatable WHERE id = %d",
+                $usage->post_id
+            ) );
+            if ( $row ) {
+                $title     = $row->title;
+                $edit_link = admin_url( 'admin.php?page=wpdatatables-edit&wdtID=' . absint( $usage->post_id ) );
+            }
+            return array( 'title' => $title, 'edit_link' => $edit_link, 'post_status' => '' );
+        }
+
+        $post = get_post( $usage->post_id );
+        return array(
+            'title'       => $post ? $post->post_title : '(Deleted)',
+            'edit_link'   => get_edit_post_link( $usage->post_id ) ?: '',
+            'post_status' => $post ? $post->post_status : '',
+        );
+    }
+
+    private function content_type_label( $post_type ) {
+        $labels = array(
+            'gravityforms' => 'Gravity Forms',
+            'wpdatatables' => 'wpDataTables',
+        );
+        return $labels[ $post_type ] ?? ucfirst( $post_type );
     }
 
     private function get_filesize( $attachment_id ) {

@@ -67,8 +67,12 @@ class GravityFormsDetector implements MediaDetector {
 					}
 				}
 
-				// Image choices on radio/checkbox/select
-				foreach ( $field->choices ?? array() as $choice ) {
+				// Image choices on radio/checkbox/select. GF sets `choices` to
+				// an empty string (not null/array) on field types that don't
+				// use it, e.g. 'html' — so a plain `?? array()` still lets a
+				// string slip through and foreach() warns on it.
+				$choices = $field->choices ?? array();
+				foreach ( is_array( $choices ) ? $choices : array() as $choice ) {
 					$img = $choice['image'] ?? '';
 					if ( $img ) {
 						$found[ $img ] = 'Form: ' . $form['title'] . ' > Choice Image: ' . $field_label;
