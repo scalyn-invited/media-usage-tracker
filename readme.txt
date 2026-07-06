@@ -3,7 +3,7 @@ Contributors: YajAce
 Tags: media, unused, cleanup, audit
 Requires at least: 6.8
 Tested up to: 6.8
-Stable tag: 1.2.2
+Stable tag: 1.2.3
 License: GPLv2 or later
 
 Identifies where every media file is used across your site, flags unused/duplicate/low-quality files, and helps clean it all up — with AI-assisted alt text along the way.
@@ -44,6 +44,10 @@ Media Usage Tracker scans your posts, pages, and custom post types (plus a wide 
 3. Go to Media Usage → Reports and run your first scan.
 
 == Changelog ==
+
+= 1.2.3 =
+* Fixed: the Mark Decorative "Unmark" button no longer looks faded/disabled — only the alt text value itself dims when an image is marked decorative.
+* Updated readme with a full feature list and changelog.
 
 = 1.2.2 =
 * Added AI Generate alt text and Mark Decorative controls to the Media Usage detail page.

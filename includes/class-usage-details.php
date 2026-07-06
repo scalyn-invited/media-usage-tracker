@@ -430,11 +430,17 @@ class UsageDetails {
                             <?php endif; ?>
                         </td></tr>
                         <?php if ( $is_image ) : ?>
-                        <tr<?php echo $is_decorative ? ' style="opacity:0.35;"' : ''; ?>><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Alt Text</th><td class="py-1.5 align-top text-sm text-gray-900 mut-qd-alttext-cell"<?php echo $is_decorative ? ' style="text-decoration:line-through;"' : ''; ?> data-id="<?php echo esc_attr( $attachment_id ); ?>">
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Alt Text</th><td class="py-1.5 align-top text-sm text-gray-900 mut-qd-alttext-cell" data-id="<?php echo esc_attr( $attachment_id ); ?>">
+                            <?php
+                            // Only the current-value text fades/strikes when
+                            // decorative — the buttons stay at full strength
+                            // so "Unmark" doesn't read as disabled.
+                            $alt_current_style = $is_decorative ? 'opacity:0.35;text-decoration:line-through;' : '';
+                            ?>
                             <?php if ( $alt_text ) : ?>
-                                <span class="mut-qd-alt-current" style="color:#787c82;font-style:italic;"><?php echo esc_html( $alt_text ); ?></span>
+                                <span class="mut-qd-alt-current" style="color:#787c82;font-style:italic;<?php echo $alt_current_style; ?>"><?php echo esc_html( $alt_text ); ?></span>
                             <?php else : ?>
-                                <span class="mut-qd-alt-current" style="color:#d63638;">— missing —</span>
+                                <span class="mut-qd-alt-current" style="color:#d63638;<?php echo $alt_current_style; ?>">— missing —</span>
                             <?php endif; ?>
                             <div style="margin-top:6px;">
                                 <?php if ( $ai_ready ) : ?>

@@ -835,11 +835,14 @@ jQuery(document).ready(function($) {
                 if (decorative) {
                     $row.find('.mut-qd-inline-review').hide();
                 }
-                // Fade out the row if just marked decorative (it'll be gone after re-audit)
+                // Fade/strike just the current alt text value, not the whole
+                // row — the buttons (especially "Unmark") need to stay at
+                // full strength so they don't read as disabled/unclickable.
+                const $current = $row.find('.mut-qd-alt-current, .mut-qd-caption-current');
                 if (decorative) {
-                    $btn.closest('tr').fadeTo(300, 0.35).find('td').css('text-decoration', 'line-through');
+                    $current.css({ opacity: 0.35, textDecoration: 'line-through' });
                 } else {
-                    $btn.closest('tr').fadeTo(300, 1).find('td').css('text-decoration', '');
+                    $current.css({ opacity: '', textDecoration: '' });
                 }
             } else {
                 alert('Failed: ' + (res.data || 'unknown error'));
