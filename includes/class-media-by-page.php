@@ -42,12 +42,32 @@ class MediaByPage {
 			$row->status    = $post->post_status;
 			$row->is_front_page = ( $front_page_id > 0 && (int) $row->post_id === $front_page_id );
 
+			// Gravity Forms usage is recorded against the form's own ID, not
+			// the page(s) that embed it via [gravityform] — cross-reference
+			// any forms this specific page actually embeds so its image
+			// count/badges reflect what's really shown there.
+			$gf_ids = $this->find_embedded_gravityform_ids( $post );
+			if ( ! empty( $gf_ids ) ) {
+				$gf_count = $this->count_gravityforms_media( $gf_ids );
+				if ( $gf_count > 0 ) {
+					$row->media_count += $gf_count;
+					$sources = $row->sources ? explode( ',', $row->sources ) : array();
+					if ( ! in_array( 'gravity_forms', $sources, true ) ) {
+						$sources[] = 'gravity_forms';
+					}
+					$row->sources = implode( ',', $sources );
+				}
+			}
+
 			if ( $search !== '' && stripos( $row->title, $search ) === false ) {
 				continue;
 			}
 
 			$filtered[] = $row;
 		}
+		usort( $filtered, function( $a, $b ) {
+			return $b->media_count <=> $a->media_count;
+		} );
 		?>
 		<div class="wrap mut-mbp">
 			<h1><i class="dashicons dashicons-layout" style="font-size:22px;vertical-align:middle;margin-right:6px;"></i> Media by Page</h1>
@@ -457,6 +477,46 @@ class MediaByPage {
 
 		$post = get_post( $post_id );
 
+		// Pull in images from any Gravity Forms form this page embeds via
+		// [gravityform] — those rows live under the form's own post_id in
+		// storage, so they'd otherwise never show up here at all.
+		$gf_ids = $this->find_embedded_gravityform_ids( $post );
+		if ( ! empty( $gf_ids ) ) {
+			$placeholders = implode( ',', array_fill( 0, count( $gf_ids ), '%d' ) );
+			$gf_rows = $wpdb->get_results( $wpdb->prepare(
+				"SELECT DISTINCT attachment_id FROM {$table} WHERE post_type = 'gravityforms' AND post_id IN ({$placeholders})",
+				...$gf_ids
+			) );
+			foreach ( $gf_rows as $r ) {
+				$aid = (int) $r->attachment_id;
+				if ( isset( $seen[ $aid ] ) ) {
+					continue;
+				}
+				$seen[ $aid ] = true;
+
+				$file  = get_attached_file( $aid );
+				$thumb = wp_get_attachment_image_url( $aid, 'thumbnail' );
+				if ( ! $thumb ) {
+					$thumb = wp_get_attachment_image_url( $aid, 'full' );
+				}
+				if ( ! $thumb ) {
+					$thumb = includes_url( 'images/media/default.png' );
+				}
+				$bytes = ( $file && file_exists( $file ) ) ? filesize( $file ) : 0;
+				$total_bytes += $bytes;
+
+				$items[] = array(
+					'id'       => $aid,
+					'filename' => basename( $file ?: get_the_title( $aid ) ),
+					'thumb'    => $thumb,
+					'full'     => wp_get_attachment_url( $aid ) ?: $thumb,
+					'source'   => 'Gravity Forms',
+					'group'    => 'Gravity Forms',
+					'size'     => size_format( $bytes ),
+				);
+			}
+		}
+
 		// The page's dominant source (e.g. "Elementor" for an Elementor-built
 		// page) is already shown once in the row header, so per-image badges
 		// only need to call out images that come from somewhere *different*.
@@ -593,6 +653,53 @@ class MediaByPage {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Find Gravity Forms form IDs embedded in a page via the [gravityform]
+	 * shortcode — checked in the raw post content and, since page builders
+	 * usually wrap the shortcode in their own widget, in Elementor's stored
+	 * data too. Matches `id="1"`, `id=\"1\"` (escaped, as stored inside
+	 * Elementor's JSON), and `id=1`.
+	 */
+	private function find_embedded_gravityform_ids( $post ) {
+		if ( ! $post ) {
+			return array();
+		}
+
+		$sources = array( $post->post_content );
+		$elementor_data = get_post_meta( $post->ID, '_elementor_data', true );
+		if ( is_string( $elementor_data ) && $elementor_data !== '' ) {
+			$sources[] = $elementor_data;
+		}
+
+		$pattern = <<<'REGEX'
+/\[gravityforms?\b[^\]]*\bid=[\\"']*(\d+)/i
+REGEX;
+
+		$ids = array();
+		foreach ( $sources as $text ) {
+			if ( preg_match_all( $pattern, $text, $m ) ) {
+				foreach ( $m[1] as $id ) {
+					$ids[] = absint( $id );
+				}
+			}
+		}
+		return array_values( array_unique( array_filter( $ids ) ) );
+	}
+
+	/**
+	 * Count distinct media attachments recorded against a set of Gravity
+	 * Forms form IDs.
+	 */
+	private function count_gravityforms_media( $form_ids ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'mut_media_usage';
+		$placeholders = implode( ',', array_fill( 0, count( $form_ids ), '%d' ) );
+		return (int) $wpdb->get_var( $wpdb->prepare(
+			"SELECT COUNT( DISTINCT attachment_id ) FROM {$table} WHERE post_type = 'gravityforms' AND post_id IN ({$placeholders})",
+			...$form_ids
+		) );
 	}
 
 	private function post_type_icon( $type ) {
