@@ -824,6 +824,17 @@ jQuery(document).ready(function($) {
             if (res.success) {
                 $btn.data('decorative', decorative ? '1' : '0');
                 $btn.text(decorative ? 'Unmark' : 'Mark Decorative');
+                // A decorative image doesn't need alt text, so hide the AI
+                // generate flow along with it — no point suggesting text for
+                // something that's intentionally left blank. The Generate
+                // button lives in the same <tr> as Mark Decorative, but not
+                // always the same <td> (Quality Detail splits them into
+                // separate columns), so look up from the row.
+                const $row = $btn.closest('tr');
+                $row.find('.mut-qd-generate-one').toggle(!decorative);
+                if (decorative) {
+                    $row.find('.mut-qd-inline-review').hide();
+                }
                 // Fade out the row if just marked decorative (it'll be gone after re-audit)
                 if (decorative) {
                     $btn.closest('tr').fadeTo(300, 0.35).find('td').css('text-decoration', 'line-through');

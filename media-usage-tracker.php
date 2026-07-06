@@ -6,7 +6,7 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
  * Plugin Name:       Media Usage Tracker
  * Plugin URI:        https://example.com/media-usage-tracker
  * Description:       Identifies where media files are used across your WordPress site, detects unused media, and provides cleanup tools.
- * Version:           1.2.1
+ * Version:           1.2.2
  * Author:            YajAce
  * Author URI:        https://example.com
  * License:           GPL-2.0+
@@ -19,7 +19,7 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 if ( ! defined( 'WPINC' ) ) {
     die;
 }
-define( 'MUT_VERSION', '1.2.1' );
+define( 'MUT_VERSION', '1.2.2' );
 define( 'MUT_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MUT_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'MUT_PLUGIN_FILE', __FILE__ );

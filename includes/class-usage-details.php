@@ -397,6 +397,10 @@ class UsageDetails {
         $in_use       = ! empty( $usages );
         $alt_text     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
         $is_image     = strpos( (string) $mime, 'image/' ) === 0;
+        $is_decorative = (bool) get_post_meta( $attachment_id, '_mut_decorative', true );
+
+        require_once MUT_PLUGIN_DIR . 'includes/class-alt-text-generator.php';
+        $ai_ready = AltTextGenerator::is_configured();
         ?>
         <div class="wrap mut-usage-details">
 
@@ -426,11 +430,36 @@ class UsageDetails {
                             <?php endif; ?>
                         </td></tr>
                         <?php if ( $is_image ) : ?>
-                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Alt Text</th><td class="py-1.5 align-top text-sm text-gray-900">
+                        <tr<?php echo $is_decorative ? ' style="opacity:0.35;"' : ''; ?>><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Alt Text</th><td class="py-1.5 align-top text-sm text-gray-900 mut-qd-alttext-cell"<?php echo $is_decorative ? ' style="text-decoration:line-through;"' : ''; ?> data-id="<?php echo esc_attr( $attachment_id ); ?>">
                             <?php if ( $alt_text ) : ?>
-                                <span class="text-gray-900"><?php echo esc_html( $alt_text ); ?></span>
+                                <span class="mut-qd-alt-current" style="color:#787c82;font-style:italic;"><?php echo esc_html( $alt_text ); ?></span>
                             <?php else : ?>
-                                <span class="inline-block rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-gray-200 text-gray-600">Not Set</span>
+                                <span class="mut-qd-alt-current" style="color:#d63638;">— missing —</span>
+                            <?php endif; ?>
+                            <div style="margin-top:6px;">
+                                <?php if ( $ai_ready ) : ?>
+                                    <button class="button button-small mut-qd-generate-one"
+                                        data-id="<?php echo esc_attr( $attachment_id ); ?>"
+                                        style="<?php echo $is_decorative ? 'display:none;' : ''; ?>">✨ Generate</button>
+                                <?php endif; ?>
+                                <button class="button button-small mut-mark-decorative"
+                                    data-id="<?php echo esc_attr( $attachment_id ); ?>"
+                                    data-decorative="<?php echo $is_decorative ? '1' : '0'; ?>">
+                                    <?php echo $is_decorative ? 'Unmark' : 'Mark Decorative'; ?>
+                                </button>
+                            </div>
+                            <?php if ( $ai_ready ) : ?>
+                                <div class="mut-qd-inline-review" style="display:none;margin-top:6px;max-width:320px;">
+                                    <input type="text" class="mut-qd-alt-input widefat"
+                                        data-id="<?php echo esc_attr( $attachment_id ); ?>"
+                                        placeholder="AI suggestion..." />
+                                    <div style="margin-top:4px;">
+                                        <button class="button button-primary button-small mut-qd-save-one"
+                                            data-id="<?php echo esc_attr( $attachment_id ); ?>">Save</button>
+                                        <button class="button button-small mut-qd-cancel-one"
+                                            style="margin-left:4px;">Cancel</button>
+                                    </div>
+                                </div>
                             <?php endif; ?>
                         </td></tr>
                         <?php endif; ?>
