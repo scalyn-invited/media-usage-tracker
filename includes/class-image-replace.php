@@ -184,9 +184,17 @@ class ImageReplace {
 					contentType: false,
 					success: function(res){
 						if (res.success) {
-							status.style.color = '#00a32a';
-							status.innerHTML = '✓ Image replaced. New size: <strong>' + res.data.new_size + '</strong>';
-							setTimeout(function(){ location.reload(); }, 1500);
+							if (res.data.still_oversized) {
+								status.style.color = '#b32d2e';
+								status.innerHTML = '⚠ Replaced, but new size <strong>' + res.data.new_size + '</strong> still exceeds the 1 MB limit.';
+							} else {
+								status.style.color = '#00a32a';
+								status.innerHTML = '✓ Image replaced. New size: <strong>' + res.data.new_size + '</strong>';
+							}
+							if (res.data.name_drifted) {
+								status.innerHTML += '<br>⚠ WordPress rescaled this further and renamed the file to <strong>' + res.data.new_filename + '</strong> — any hardcoded links to the old filename will break.';
+							}
+							setTimeout(function(){ location.reload(); }, 1800);
 						} else {
 							status.style.color = '#d63638';
 							status.textContent = '✗ ' + (res.data || 'Replace failed.');
@@ -215,7 +223,7 @@ class ImageReplace {
 			wp_send_json_error( 'Invalid request.' );
 		}
 
-		if ( ! current_user_can( 'upload_files' ) ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( 'Permission denied.' );
 		}
 
@@ -261,8 +269,31 @@ class ImageReplace {
 			$new_ext = $file_type['ext'] ?: pathinfo( $_FILES['file']['name'], PATHINFO_EXTENSION );
 		}
 
-		// Delete old thumbnails before replacing
 		$old_meta = wp_get_attachment_metadata( $attachment_id );
+		$new_file = $old_dir . '/' . $old_name . '.' . $new_ext;
+
+		// Stage the replacement file under a temp name first. Nothing that
+		// belongs to the existing attachment is touched until this succeeds,
+		// so a failed copy/move here can't leave the attachment half-deleted.
+		$staged_file = $old_dir . '/.mut-replace-' . uniqid() . '.' . $new_ext;
+		if ( $source === 'library' ) {
+			if ( ! copy( $source_file, $staged_file ) ) {
+				wp_send_json_error( 'Failed to copy source file.' );
+			}
+		} else {
+			if ( ! move_uploaded_file( $tmp_file, $staged_file ) ) {
+				wp_send_json_error( 'Failed to move uploaded file.' );
+			}
+		}
+		if ( ! @getimagesize( $staged_file ) ) {
+			@unlink( $staged_file );
+			wp_send_json_error( 'Replacement file is not a readable image.' );
+		}
+
+		// Now that the new file is safely on disk, remove everything the old
+		// attachment owned: generated thumbnails, the pre-scaling full-size
+		// original WordPress keeps alongside a "-scaled" file (if any), and
+		// the old full-size file itself when the extension is changing.
 		if ( ! empty( $old_meta['sizes'] ) ) {
 			foreach ( $old_meta['sizes'] as $size_data ) {
 				$thumb_path = $old_dir . '/' . $size_data['file'];
@@ -271,27 +302,22 @@ class ImageReplace {
 				}
 			}
 		}
-		$scaled_path = $old_dir . '/' . $old_name . '-scaled.' . $old_ext;
-		if ( file_exists( $scaled_path ) ) {
-			@unlink( $scaled_path );
+		if ( ! empty( $old_meta['original_image'] ) ) {
+			$original_path = $old_dir . '/' . $old_meta['original_image'];
+			if ( file_exists( $original_path ) ) {
+				@unlink( $original_path );
+			}
 		}
 
-		// Keep original filename
-		$new_file = $old_dir . '/' . $old_name . '.' . $new_ext;
-
-		if ( strtolower( $old_ext ) !== strtolower( $new_ext ) ) {
+		if ( file_exists( $new_file ) ) {
+			@unlink( $new_file ); // rename() does not reliably overwrite on every platform.
+		}
+		if ( strtolower( $old_ext ) !== strtolower( $new_ext ) && file_exists( $old_file ) ) {
 			@unlink( $old_file );
 		}
 
-		// Copy or move the replacement file
-		if ( $source === 'library' ) {
-			if ( ! copy( $source_file, $new_file ) ) {
-				wp_send_json_error( 'Failed to copy source file.' );
-			}
-		} else {
-			if ( ! move_uploaded_file( $tmp_file, $new_file ) ) {
-				wp_send_json_error( 'Failed to move uploaded file.' );
-			}
+		if ( ! rename( $staged_file, $new_file ) ) {
+			wp_send_json_error( 'Failed to move replacement file into place.' );
 		}
 
 		// Set proper permissions
@@ -311,16 +337,28 @@ class ImageReplace {
 			}
 		}
 
-		// Regenerate thumbnails and metadata
+		// Regenerate thumbnails and metadata. If the replacement still exceeds
+		// WordPress's own big-image threshold (2560px by default), core scales
+		// it down again internally and repoints the attachment at a *different*
+		// file (e.g. "name-scaled.png" -> "name-scaled-scaled.png"), so re-read
+		// the attached file afterward rather than trusting our own $new_file.
 		require_once ABSPATH . 'wp-admin/includes/image.php';
 		$new_meta = wp_generate_attachment_metadata( $attachment_id, $new_file );
 		wp_update_attachment_metadata( $attachment_id, $new_meta );
 
-		$new_size = filesize( $new_file );
+		$final_file     = get_attached_file( $attachment_id );
+		$final_file     = ( $final_file && file_exists( $final_file ) ) ? $final_file : $new_file;
+		$new_size       = filesize( $final_file );
+		$name_drifted   = basename( $final_file ) !== basename( $new_file );
+
+		require_once MUT_PLUGIN_DIR . 'includes/quality/interface-quality-check.php';
+		require_once MUT_PLUGIN_DIR . 'includes/quality/class-oversized-image-check.php';
 
 		wp_send_json_success( array(
-			'new_size'     => size_format( $new_size ),
-			'new_filename' => basename( $new_file ),
+			'new_size'        => size_format( $new_size ),
+			'new_filename'    => basename( $final_file ),
+			'name_drifted'    => $name_drifted,
+			'still_oversized' => $new_size > \MediaUsageTracker\Quality\OversizedImageCheck::THRESHOLD_BYTES,
 		) );
 	}
 }

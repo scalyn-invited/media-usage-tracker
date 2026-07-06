@@ -385,7 +385,8 @@ class UsageDetails {
         $usages      = $this->storage->get_usages_for_attachment( $attachment_id );
         $filename    = basename( get_attached_file( $attachment_id ) );
         $upload_date = get_the_date( 'M j, Y g:i A', $attachment );
-        $filesize    = $this->get_filesize( $attachment_id );
+        $filesize_bytes = $this->get_filesize_bytes( $attachment_id );
+        $filesize    = $filesize_bytes === null ? '—' : size_format( $filesize_bytes );
         $edit_url    = get_edit_post_link( $attachment_id );
         $media_url   = admin_url( 'upload.php?item=' . $attachment_id );
         $mime        = $attachment->post_mime_type;
@@ -398,6 +399,11 @@ class UsageDetails {
         $alt_text     = get_post_meta( $attachment_id, '_wp_attachment_image_alt', true );
         $is_image     = strpos( (string) $mime, 'image/' ) === 0;
         $is_decorative = (bool) get_post_meta( $attachment_id, '_mut_decorative', true );
+
+        require_once MUT_PLUGIN_DIR . 'includes/quality/interface-quality-check.php';
+        require_once MUT_PLUGIN_DIR . 'includes/quality/class-oversized-image-check.php';
+        $is_oversized = $is_image && $filesize_bytes !== null
+            && $filesize_bytes > \MediaUsageTracker\Quality\OversizedImageCheck::THRESHOLD_BYTES;
 
         require_once MUT_PLUGIN_DIR . 'includes/class-alt-text-generator.php';
         $ai_ready = AltTextGenerator::is_configured();
@@ -420,7 +426,12 @@ class UsageDetails {
                             <span class="mut-type-badge mut-type-<?php echo esc_attr( $type_class ); ?>"><?php echo esc_html( $type_label ); ?></span>
                         </td></tr>
                         <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Upload Date</th><td class="py-1.5 align-top text-sm text-gray-900"><?php echo esc_html( $upload_date ); ?></td></tr>
-                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">File Size</th><td class="py-1.5 align-top text-sm text-gray-900"><?php echo esc_html( $filesize ); ?></td></tr>
+                        <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">File Size</th><td class="py-1.5 align-top text-sm text-gray-900">
+                            <?php echo esc_html( $filesize ); ?>
+                            <?php if ( $is_oversized ) : ?>
+                                <span class="inline-block ml-2 rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide bg-red-100 text-red-800">⚠ Exceeds 1 MB SOP limit</span>
+                            <?php endif; ?>
+                        </td></tr>
                         <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Usage Count</th><td class="py-1.5 align-top text-sm text-gray-900"><strong><?php echo count( $unique_posts ); ?> post(s)</strong></td></tr>
                         <tr><th class="py-1.5 pr-4 text-left align-top text-sm font-semibold text-gray-500 whitespace-nowrap">Status</th><td class="py-1.5 align-top text-sm text-gray-900">
                             <?php if ( $in_use ) : ?>
@@ -474,6 +485,9 @@ class UsageDetails {
                         <a href="<?php echo esc_url( $media_url ); ?>" class="button">View in Media Library</a>
                         <?php if ( $edit_url ) : ?>
                             <a href="<?php echo esc_url( $edit_url ); ?>" class="button">Edit Media</a>
+                        <?php endif; ?>
+                        <?php if ( $is_oversized && $edit_url ) : ?>
+                            <a href="<?php echo esc_url( $edit_url ); ?>#mut-replace-image" class="button button-primary">🔄 Replace Image</a>
                         <?php endif; ?>
                         <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-bulk-review' ) ); ?>" class="button">🚩 Review</a>
                         <a href="<?php echo esc_url( add_query_arg( array( 'export' => 'all' ), admin_url( 'admin.php?page=mut-reports' ) ) ); ?>" class="button">⬇ Export</a>
@@ -669,11 +683,16 @@ class UsageDetails {
     }
 
     private function get_filesize( $attachment_id ) {
+        $bytes = $this->get_filesize_bytes( $attachment_id );
+        return $bytes === null ? '—' : size_format( $bytes );
+    }
+
+    private function get_filesize_bytes( $attachment_id ) {
         $file = get_attached_file( $attachment_id );
         if ( $file && file_exists( $file ) ) {
-            return size_format( filesize( $file ) );
+            return filesize( $file );
         }
-        return '—';
+        return null;
     }
 
     private function mime_label( $mime ) {

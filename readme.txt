@@ -3,7 +3,7 @@ Contributors: YajAce
 Tags: media, unused, cleanup, audit
 Requires at least: 6.8
 Tested up to: 6.8
-Stable tag: 1.2.3
+Stable tag: 1.2.4
 License: GPLv2 or later
 
 Identifies where every media file is used across your site, flags unused/duplicate/low-quality files, and helps clean it all up — with AI-assisted alt text along the way.
@@ -44,6 +44,10 @@ Media Usage Tracker scans your posts, pages, and custom post types (plus a wide 
 3. Go to Media Usage → Reports and run your first scan.
 
 == Changelog ==
+
+= 1.2.4 =
+* Added a "Replace Image" action to the Media Usage detail page for images over the 1 MB size limit, wired up to the existing (previously dormant) in-place image replace tool on the Edit Media screen.
+* Fixed the image replace tool to require the correct capability, avoid deleting old files before the new one is safely in place, clean up the orphaned pre-scaling original image, and report the true final size/filename after WordPress's own image processing runs.
 
 = 1.2.3 =
 * Fixed: the Mark Decorative "Unmark" button no longer looks faded/disabled — only the alt text value itself dims when an image is marked decorative.

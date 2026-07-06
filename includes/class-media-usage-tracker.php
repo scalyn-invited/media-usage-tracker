@@ -50,6 +50,7 @@ class Plugin {
         require_once MUT_PLUGIN_DIR . 'includes/class-media-by-page.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-notifier.php';
         require_once MUT_PLUGIN_DIR . 'includes/class-attachment-ai.php';
+        require_once MUT_PLUGIN_DIR . 'includes/class-image-replace.php';
 
         $this->storage = new \MediaUsageTracker\Storage\UsageStorage();
         $this->scanner = new \MediaUsageTracker\Scanner\MediaScanner( $this->storage );
@@ -149,6 +150,8 @@ class Plugin {
 
             $attachment_ai = new \MediaUsageTracker\Admin\AttachmentAI();
             $attachment_ai->register();
+
+            new \MediaUsageTracker\Admin\ImageReplace();
         }
     }
 
