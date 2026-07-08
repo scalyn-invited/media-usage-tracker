@@ -25,6 +25,9 @@ class UsageDetails {
     private function render_list() {
         global $wpdb;
 
+        require_once MUT_PLUGIN_DIR . 'includes/quality/interface-quality-check.php';
+        require_once MUT_PLUGIN_DIR . 'includes/quality/class-oversized-image-check.php';
+
         // Get ALL attachments, not just those with usage records
         $attachments = $wpdb->get_results(
             "SELECT ID, post_title, post_mime_type, post_date
@@ -108,7 +111,7 @@ class UsageDetails {
                             $in_use      = isset( $used_ids[ $id ] );
                             $count       = $in_use ? $this->storage->get_usage_count( $id ) : 0;
                             $detail_url  = admin_url( 'admin.php?page=mut-usage-details&attachment_id=' . $id );
-                            $review_url  = admin_url( 'admin.php?page=mut-bulk-review' );
+                            $review_url  = admin_url( 'admin.php?page=mut-bulk-review&highlight=' . $id );
                             $export_url  = add_query_arg( array(
                                 'page'        => 'mut-reports',
                                 'export_xlsx' => 'attachment_' . $id,
@@ -127,6 +130,9 @@ class UsageDetails {
                             // present. A missing image file otherwise renders as an empty
                             // broken-image box; fall back to the labelled type icon instead.
                             $show_thumb  = $thumb && ( ! $is_image || ( $file_path && file_exists( $file_path ) ) );
+                            $filesize_bytes = $this->get_filesize_bytes( $id );
+                            $is_oversized   = $is_image && $filesize_bytes !== null
+                                && $filesize_bytes > \MediaUsageTracker\Quality\OversizedImageCheck::THRESHOLD_BYTES;
                         ?>
                             <tr data-id="<?php echo esc_attr( $id ); ?>" data-inuse="<?php echo $in_use ? '1' : '0'; ?>"
                                 class="flex flex-wrap items-center gap-x-3 gap-y-2 md:table-row mb-3 last:mb-0 md:mb-0 rounded-lg md:rounded-none border md:border-0 border-gray-200 bg-white p-3 md:p-0 md:hover:bg-gray-50 md:even:bg-gray-50/60">
@@ -154,7 +160,9 @@ class UsageDetails {
                                     </span>
                                 </td>
                                 <td class="order-6 max-md:hidden md:table-cell md:w-[12%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500"><?php echo esc_html( $upload_date ); ?></td>
-                                <td class="order-7 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs text-gray-500 before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none"><?php echo esc_html( $this->get_filesize( $id ) ); ?></td>
+                                <td class="order-7 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle text-xs before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none <?php echo $is_oversized ? 'font-semibold text-red-600' : 'text-gray-500'; ?>" title="<?php echo $is_oversized ? esc_attr( 'Over the 1 MB SOP limit' ) : ''; ?>">
+                                    <?php echo esc_html( $filesize_bytes === null ? '—' : size_format( $filesize_bytes ) ); ?><?php echo $is_oversized ? ' ⚠️' : ''; ?>
+                                </td>
                                 <td class="order-8 md:table-cell md:w-[8%] px-0 md:px-4 py-1 md:py-3 md:align-middle before:content-['·'] before:mr-3 before:text-gray-300 md:before:content-none">
                                     <span class="inline-flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[11px] font-bold text-white <?php echo $count > 0 ? 'bg-emerald-600' : 'bg-gray-400'; ?>">
                                         <?php echo $count; ?>
@@ -173,6 +181,9 @@ class UsageDetails {
                                 <td class="order-11 md:table-cell md:w-[14%] px-0 md:px-4 py-1 md:py-3 md:align-middle flex gap-1.5 md:whitespace-nowrap">
                                     <a href="<?php echo esc_url( $detail_url ); ?>" class="button button-small" title="View Usage">👁 View</a>
                                     <a href="<?php echo esc_url( $review_url ); ?>" class="button button-small" title="Review">🚩 Review</a>
+                                    <?php if ( $is_oversized ) : ?>
+                                        <a href="<?php echo esc_url( get_edit_post_link( $id ) . '#mut-replace-image' ); ?>" class="button button-small button-primary" title="Over the 1 MB SOP limit — replace with a smaller file">🔄 Replace</a>
+                                    <?php endif; ?>
                                     <?php if ( ! $in_use ) : ?>
                                         <button type="button" class="button button-small mut-delete-btn mut-ud-del-btn"
                                             data-id="<?php echo esc_attr( $id ); ?>"
@@ -489,7 +500,7 @@ class UsageDetails {
                         <?php if ( $is_oversized && $edit_url ) : ?>
                             <a href="<?php echo esc_url( $edit_url ); ?>#mut-replace-image" class="button button-primary">🔄 Replace Image</a>
                         <?php endif; ?>
-                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-bulk-review' ) ); ?>" class="button">🚩 Review</a>
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-bulk-review&highlight=' . $attachment_id ) ); ?>" class="button">🚩 Review</a>
                         <a href="<?php echo esc_url( add_query_arg( array( 'export' => 'all' ), admin_url( 'admin.php?page=mut-reports' ) ) ); ?>" class="button">⬇ Export</a>
                     </div>
                 </div>

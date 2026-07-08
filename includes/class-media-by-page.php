@@ -249,6 +249,17 @@ class MediaByPage {
 				var items = res.data.items;
 				var dominantSource = res.data.dominant_source || '';
 
+				// "from Daniel Lazar" only adds information when the
+				// filename doesn't already say so (e.g. "photo1.jpg" from
+				// "Daniel Lazar") — files like "Daniel-Lazar-1.jpg" already
+				// make that obvious, so skip the redundant label.
+				function slugMatches(filename, name) {
+					var norm = function(s) {
+						return s.toLowerCase().replace(/\.[a-z0-9]+$/i, '').replace(/[^a-z0-9]/g, '').replace(/[0-9]+$/, '');
+					};
+					return norm(filename) === norm(name);
+				}
+
 				// Bucket items by their group label (e.g. "Image Carousel
 				// widget"), preserving first-seen order.
 				var groupOrder = [];
@@ -310,7 +321,7 @@ class MediaByPage {
 						html += '<div class="mut-mbp-thumb-info">';
 						html += '<div class="mut-mbp-thumb-name" title="' + di.filename + '">' + di.filename + '</div>';
 						html += '<span class="mut-mbp-thumb-source mut-mbp-src-jet">' + di.source + '</span>';
-						if (di.from) { html += '<span class="mut-mbp-thumb-source" style="font-size:10px;background:#f0f0f1;color:#646970;">from ' + di.from + '</span>'; }
+						if (di.from && !slugMatches(di.filename, di.from)) { html += '<span class="mut-mbp-thumb-source" style="font-size:10px;background:#f0f0f1;color:#646970;">from ' + di.from + '</span>'; }
 						html += '</div></div>';
 					}
 					html += '</div></div>';

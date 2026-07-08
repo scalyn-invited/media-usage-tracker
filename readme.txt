@@ -3,7 +3,7 @@ Contributors: YajAce
 Tags: media, unused, cleanup, audit
 Requires at least: 6.8
 Tested up to: 6.8
-Stable tag: 1.2.4
+Stable tag: 1.2.5
 License: GPLv2 or later
 
 Identifies where every media file is used across your site, flags unused/duplicate/low-quality files, and helps clean it all up — with AI-assisted alt text along the way.
@@ -44,6 +44,11 @@ Media Usage Tracker scans your posts, pages, and custom post types (plus a wide 
 3. Go to Media Usage → Reports and run your first scan.
 
 == Changelog ==
+
+= 1.2.5 =
+* Extended the "Replace Image" oversized-file action from the detail page to the main Media Usage list — files over 1 MB now show a red-flagged size and a Replace button right in the table.
+* "from {name}" labels on Media by Page dynamic content now only show when the filename doesn't already make it obvious.
+* Review button now jumps straight to the specific file in Bulk Review instead of the generic, unfiltered list.
 
 = 1.2.4 =
 * Added a "Replace Image" action to the Media Usage detail page for images over the 1 MB size limit, wired up to the existing (previously dormant) in-place image replace tool on the Edit Media screen.

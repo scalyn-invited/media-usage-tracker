@@ -124,9 +124,14 @@ class BulkReview {
             $current_tab = 'all';
         }
 
+        // Jumped here from a specific file's "Review" button elsewhere in
+        // the plugin — show just that one file instead of the full,
+        // paginated list, so there's no page-hunting to find it.
+        $highlight_id = absint( $_GET['highlight'] ?? 0 );
+
         $paged    = max( 1, absint( $_GET['paged'] ?? 1 ) );
         $per_page = 20;
-        $results  = $this->query_attachments( $current_tab, $paged, $per_page );
+        $results  = $this->query_attachments( $current_tab, $paged, $per_page, $highlight_id );
         $items    = $results['items'];
         $total    = $results['total'];
         $pages    = $total > 0 ? ceil( $total / $per_page ) : 1;
@@ -153,7 +158,16 @@ class BulkReview {
             <h1>📋 Bulk Review</h1>
             <p class="mut-bulk-intro">Select files and apply bulk actions. Deletion remains manual for safety.</p>
 
-            <?php $this->render_tabs( $current_tab, $counts ); ?>
+            <?php if ( $highlight_id > 0 ) : ?>
+                <div class="notice notice-info" style="margin:12px 0;padding:10px 14px;">
+                    <p style="margin:0;">
+                        Showing 1 file.
+                        <a href="<?php echo esc_url( admin_url( 'admin.php?page=mut-bulk-review' ) ); ?>">View all files</a>
+                    </p>
+                </div>
+            <?php else : ?>
+                <?php $this->render_tabs( $current_tab, $counts ); ?>
+            <?php endif; ?>
 
             <div id="mut-bulk-notice" class="mut-bulk-notice hidden"></div>
 
@@ -392,7 +406,7 @@ class BulkReview {
     // Query
     // -------------------------------------------------------------------------
 
-    private function query_attachments( $tab, $paged, $per_page ) {
+    private function query_attachments( $tab, $paged, $per_page, $highlight_id = 0 ) {
         global $wpdb;
 
         $offset     = ( $paged - 1 ) * $per_page;
@@ -401,7 +415,11 @@ class BulkReview {
 
         $where = array( "p.post_type = 'attachment'", "p.post_status = 'inherit'" );
 
-        if ( $tab === 'flagged' ) {
+        if ( $highlight_id > 0 ) {
+            // Ignore the tab filter — the caller asked for one specific
+            // file, not whatever subset the current tab happens to show.
+            $where[] = $wpdb->prepare( 'p.ID = %d', $highlight_id );
+        } elseif ( $tab === 'flagged' ) {
             $where[] = "r.status = 'flagged'";
         } elseif ( $tab === 'archived' ) {
             $where[] = "r.status = 'archived'";
